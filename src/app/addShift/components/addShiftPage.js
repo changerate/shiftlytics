@@ -10,15 +10,14 @@ import TimeInput from "../../../components/TimeInput";
 
 export default function AddShiftPage() {
 
-    const today = new Date().toISOString().split('T')[0];
-
     const [shiftData, setShiftData] = useState({
-        employeeName: "",
-        position: "",
         date: new Date().toISOString().split('T')[0],
         startTime: "",
         endTime: "",
-        department: "",
+        lunchInTime: "",
+        lunchOutTime: "",
+        addLunch: false,
+        wage: "",
         notes: ""
     });
 
@@ -27,10 +26,10 @@ export default function AddShiftPage() {
     const router = useRouter();
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setShiftData(prev => ({
         ...prev,
-        [name]: value
+        [name]: type === 'checkbox' ? checked : value
         }));
     };
 
@@ -138,32 +137,57 @@ export default function AddShiftPage() {
                     </div>
 
 
+                    {/* Add A Lunch Checkbox */}
+                    <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border">
+                        <input
+                            type="checkbox"
+                            id="addLunch"
+                            name="addLunch"
+                            checked={shiftData.addLunch}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                        />
+                        <label htmlFor="addLunch" className="flex-1">
+                            <span className="text-sm font-medium text-gray-900">Add A Lunch</span>
+                            <p className="text-xs text-gray-500">Check this box to add your lunch break</p>
+                        </label>
+                        {! shiftData.addLunch && (
+                            <div className="flex items-center space-x-1 text-orange-600">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                                <span className="text-xs font-medium">Lunch skipped</span>
+                            </div>
+                        )}
+                    </div>
+
                     {/* Lunch In */}
-                    <div>
-                        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-2">
-                        Lunch In *
+                    <div className={! shiftData.addLunch ? 'opacity-50 pointer-events-none' : ''}>
+                        <label htmlFor="lunchInTime" className="block text-sm font-medium text-gray-700 mb-2">
+                            Lunch In {shiftData.addLunch && '*'}
                         </label>
                         <TimeInput
-                        id="startTime"
-                        name="startTime"
-                        value={shiftData.startTime}
-                        onChange={handleInputChange}
-                        required
+                            id="lunchInTime"
+                            name="lunchInTime"
+                            value={shiftData.lunchInTime}
+                            onChange={handleInputChange}
+                            required={shiftData.addLunch}
+                            disabled={! shiftData.addLunch}
                         />
                     </div>
 
-
                     {/* Lunch Out */}
-                    <div>
-                        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-2">
-                        Lunch Out *
+                    <div className={! shiftData.addLunch ? 'opacity-50 pointer-events-none' : ''}>
+                        <label htmlFor="lunchOutTime" className="block text-sm font-medium text-gray-700 mb-2">
+                            Lunch Out {shiftData.addLunch && '*'}
                         </label>
                         <TimeInput
-                        id="endTime"
-                        name="endTime"
-                        value={shiftData.endTime}
-                        onChange={handleInputChange}
-                        required
+                            id="lunchOutTime"
+                            name="lunchOutTime"
+                            value={shiftData.lunchOutTime}
+                            onChange={handleInputChange}
+                            required={shiftData.addLunch}
+                            disabled={! shiftData.addLunch}
                         />
                     </div>
 
