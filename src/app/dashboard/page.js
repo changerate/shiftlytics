@@ -28,14 +28,18 @@ export default function Dashboard() {
     }, []);
 
     const handleLogout = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (!error) {
-            window.location.href = "/login"; // Redirect to login page after logout
-        } else if (error.message === "Auth session missing!") {
-            window.location.href = "/login"; // Redirect to login page after logout, especially if auth token missing
-        } else {
-        console.error("Logout failed:", error.message);
-        console.error(error);
+        try {
+            const { error } = await supabase.auth.signOut();
+
+            // Sign out always clears the session—even if there's no active session.
+            // So it's safe to redirect afterward regardless of error.
+            window.location.href = "/login";
+
+            if (error) {
+            console.warn("Supabase logout error:", error.message);
+            }
+        } catch (err) {
+            console.error("Unexpected logout error:", err);
         }
     };
 
