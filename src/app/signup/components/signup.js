@@ -32,32 +32,6 @@ export default function SignUp() {
     password,
   });
 
-  if (signUpError) {
-    setError(signUpError.message);
-    setLoading(false);
-    return;
-  }
-
-  const user = data.user;
-
-  if (user) {
-    const { error: insertError } = await supabase.from("profiles").insert([
-      {
-        id: user.id,             // <-- foreign key to auth.users
-        first_name: firstName,
-        last_name: lastName,
-        company: company,
-        position: position,
-      },
-    ]);
-
-    if (insertError) {
-      setError("Profile creation failed: " + insertError.message);
-      setLoading(false);
-      return;
-    }
-  }
-
   alert("Sign-up successful! Please check your email to confirm your account.");
   setLoading(false);
   router.push("/login");

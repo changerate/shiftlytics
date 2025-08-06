@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabaseClient";
+import { ensureUserProfile } from "../../../utils/profileUtils";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -28,7 +29,9 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -37,9 +40,28 @@ export default function LoginPage() {
       setError(error.message || "Invalid email or password.");
       setLoading(false);
     } else {
+      const user = data.user;
+      
+      if (user) {
+        // Ensure user profile exists using utility function
+        const profileResult = await ensureUserProfile(user);
+        
+        if (!profileResult.success) {
+          console.error('Profile handling failed:', profileResult.error);
+          setError(profileResult.error);
+          setLoading(false);
+          return;
+        }
+        
+        console.log('Profile ready:', profileResult.profile);
+      }
+      
+      setLoading(false);
       router.push("/dashboard");
     }
   };
+
+
 
   const handleGoogleLogin = async () => {
     setError("");
@@ -54,6 +76,8 @@ export default function LoginPage() {
     if (error) {
       setError(error.message || "Google login failed.");
     }
+    // Note: Profile creation for OAuth will be handled by the auth state change listener
+    // or in a separate callback page
   };
 
   if (loading) {
