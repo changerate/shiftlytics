@@ -1,6 +1,4 @@
-import Button from '@/app/dashboard/components/Button';
-
-
+import Button from './components/Button';
 
 export default function Dashboard() {
   return (
