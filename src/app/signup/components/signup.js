@@ -5,31 +5,63 @@ import { supabase } from "../../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
 export default function SignUp() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [company, setCompany] = useState("");
+  const [position, setPosition] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+ const handleSignUp = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+  if (password !== confirmPassword) {
+    setError("Passwords do not match.");
+    return;
+  }
 
-    if (error) {
-      setError(error.message);
+  setLoading(true);
+
+  const { data, error: signUpError } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+
+  if (signUpError) {
+    setError(signUpError.message);
+    setLoading(false);
+    return;
+  }
+
+  const user = data.user;
+
+  if (user) {
+    const { error: insertError } = await supabase.from("profiles").insert([
+      {
+        id: user.id,             // <-- foreign key to auth.users
+        first_name: firstName,
+        last_name: lastName,
+        company: company,
+        position: position,
+      },
+    ]);
+
+    if (insertError) {
+      setError("Profile creation failed: " + insertError.message);
       setLoading(false);
-    } else {
-      alert("Sign-up successful! Please check your email to confirm your account.");
-      setLoading(false);
-      router.push("/login"); // Redirect to login page after successful sign-up
+      return;
     }
-  };
+  }
+
+  alert("Sign-up successful! Please check your email to confirm your account.");
+  setLoading(false);
+  router.push("/login");
+};
 
   return (
     <div
@@ -47,6 +79,94 @@ export default function SignUp() {
           Sign Up
         </h1>
         <form onSubmit={handleSignUp} className="space-y-4">
+          <div>
+            <label
+              htmlFor="firstName"
+              className="block text-sm sm:text-base font-medium"
+              style={{ color: "#c5d3e6" }} // prussian_blue-900
+            >
+              First Name
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
+              style={{
+                backgroundColor: "#3e5c76", // payne's_gray
+                borderColor: "#748cab", // silver_lake_blue
+                color: "#f0ebd8", // eggshell
+              }}
+              required
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="lastName"
+              className="block text-sm sm:text-base font-medium"
+              style={{ color: "#c5d3e6" }} // prussian_blue-900
+            >
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
+              style={{
+                backgroundColor: "#3e5c76", // payne's_gray
+                borderColor: "#748cab", // silver_lake_blue
+                color: "#f0ebd8", // eggshell
+              }}
+              required
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="company"
+              className="block text-sm sm:text-base font-medium"
+              style={{ color: "#c5d3e6" }} // prussian_blue-900
+            >
+              Company
+            </label>
+            <input
+              type="text"
+              id="company"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
+              style={{
+                backgroundColor: "#3e5c76", // payne's_gray
+                borderColor: "#748cab", // silver_lake_blue
+                color: "#f0ebd8", // eggshell
+              }}
+              required
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="position"
+              className="block text-sm sm:text-base font-medium"
+              style={{ color: "#c5d3e6" }} // prussian_blue-900
+            >
+              Position
+            </label>
+            <input
+              type="text"
+              id="position"
+              value={position}
+              onChange={(e) => setPosition(e.target.value)}
+              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
+              style={{
+                backgroundColor: "#3e5c76", // payne's_gray
+                borderColor: "#748cab", // silver_lake_blue
+                color: "#f0ebd8", // eggshell
+              }}
+              required
+            />
+          </div>
           <div>
             <label
               htmlFor="email"
@@ -82,6 +202,28 @@ export default function SignUp() {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
+              style={{
+                backgroundColor: "#3e5c76", // payne's_gray
+                borderColor: "#748cab", // silver_lake_blue
+                color: "#f0ebd8", // eggshell
+              }}
+              required
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm sm:text-base font-medium"
+              style={{ color: "#c5d3e6" }} // prussian_blue-900
+            >
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              id="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
               style={{
                 backgroundColor: "#3e5c76", // payne's_gray
