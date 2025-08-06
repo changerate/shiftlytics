@@ -99,7 +99,7 @@ export default function WageSelector({ value, onChange, name, required = false }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
             required={required}
         >
-        <option value="">Select a wage...</option>
+        <option value="" disabled>Select a wage...</option>
         {wages.map((wage) => (
             <option key={wage.id} value={wage.id}>
             {createWageDisplayString(wage)}
