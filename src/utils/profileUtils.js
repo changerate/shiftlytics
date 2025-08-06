@@ -15,7 +15,7 @@ export const ensureUserProfile = async (user) => {
     const { data: existingProfile, error: selectError } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', user.id)
+      .eq('id', user.user_id)
       .single();
 
     // If profile exists, return it
@@ -40,7 +40,7 @@ export const ensureUserProfile = async (user) => {
     const emailUsername = user.email?.split('@')[0] || 'User';
     
     const profileData = {
-      id: user.id,
+      id: user.user_id,
       email: user.email,
       first_name: userMetadata.first_name || 
                  userMetadata.full_name?.split(' ')[0] || 
