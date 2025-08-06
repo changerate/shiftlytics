@@ -30,9 +30,12 @@ export default function Dashboard() {
     const handleLogout = async () => {
         const { error } = await supabase.auth.signOut();
         if (!error) {
-        window.location.href = "/login"; // Redirect to login page after logout
+            window.location.href = "/login"; // Redirect to login page after logout
+        } else if (error.message === "Auth session missing!") {
+            window.location.href = "/login"; // Redirect to login page after logout, especially if auth token missing
         } else {
         console.error("Logout failed:", error.message);
+        console.error(error);
         }
     };
 
