@@ -63,6 +63,12 @@ export default function Dashboard() {
                 </div>
                 <div className="flex items-center space-x-4">
 
+                {/* Add New Shift */}
+                <Button 
+                    onClick={() => window.location.href = "/addShift"}
+                >
+                    Add New Shift
+                </Button>
                 {/* Logout Button */}
                 <button
                     onClick={handleLogout}
