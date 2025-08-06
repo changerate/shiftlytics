@@ -1,5 +1,9 @@
 import { supabase } from '../lib/supabaseClient';
 
+
+
+
+
 /**
  * Ensures a user profile exists in the profiles table
  * @param {Object} user - The authenticated user object from Supabase
@@ -15,7 +19,7 @@ export const ensureUserProfile = async (user) => {
     const { data: existingProfile, error: selectError } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', user.user_id)
+      .eq('user_id', user.id)
       .single();
 
     // If profile exists, return it
@@ -40,7 +44,7 @@ export const ensureUserProfile = async (user) => {
     const emailUsername = user.email?.split('@')[0] || 'User';
     
     const profileData = {
-      id: user.user_id,
+      user_id: user.id,
       email: user.email,
       first_name: userMetadata.first_name || 
                  userMetadata.full_name?.split(' ')[0] || 
@@ -77,6 +81,12 @@ export const ensureUserProfile = async (user) => {
   }
 };
 
+
+
+
+
+
+
 /**
  * Updates an existing user profile
  * @param {string} userId - The user ID
@@ -97,7 +107,7 @@ export const updateUserProfile = async (userId, updates) => {
     const { data: updatedProfile, error } = await supabase
       .from('profiles')
       .update(updatedData)
-      .eq('id', userId)
+      .eq('user_id', userId)
       .select()
       .single();
 
@@ -115,6 +125,11 @@ export const updateUserProfile = async (userId, updates) => {
   }
 };
 
+
+
+
+
+
 /**
  * Gets a user profile by ID
  * @param {string} userId - The user ID
@@ -129,7 +144,7 @@ export const getUserProfile = async (userId) => {
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', userId)
+      .eq('user_id', userId)
       .single();
 
     if (error) {
