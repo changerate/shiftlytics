@@ -1,8 +1,40 @@
-import Button from '@/app/dashboard/components/Button';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Button from './components/Button';
+import { getCurrentUser, logout } from '../../lib/auth';
 
 
 
 export default function Dashboard() {
+  const [user, setUser] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      router.push('/login');
+    } else {
+      setUser(currentUser);
+    }
+  }, [router]);
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       {/* Header */}
@@ -11,12 +43,20 @@ export default function Dashboard() {
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600">Employee Scheduler Management</p>
+              <p className="text-gray-600">Welcome back, {user.email} ({user.role})</p>
             </div>
             <div className="flex items-center space-x-4">
-              <Button >Something A Button Would Say</Button>
+              <span className="text-sm text-gray-600 capitalize">
+                {user.role} Dashboard
+              </span>
               <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
                 New Schedule
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                Logout
               </button>
             </div>
           </div>
