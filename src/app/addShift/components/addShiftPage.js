@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import TimeInput from "../../../components/TimeInput";
+import WageSelector from "../../../components/WageSelector";
 
 
 
@@ -17,7 +18,7 @@ export default function AddShiftPage() {
         lunchInTime: "",
         lunchOutTime: "",
         addLunch: false,
-        wage: "",
+        wageId: "",
         notes: ""
     });
 
@@ -206,6 +207,20 @@ export default function AddShiftPage() {
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                             placeholder="Add any additional notes or special instructions..."
                             />
+                    </div>
+
+
+                    {/* Wage Selection */}
+                    <div>
+                        <label htmlFor="wageId" className="block text-sm font-medium text-gray-700 mb-2">
+                            Wage *
+                        </label>
+                        <WageSelector
+                            name="wageId"
+                            value={shiftData.wageId}
+                            onChange={handleInputChange}
+                            required
+                        />
                     </div>
                 </div>
 
