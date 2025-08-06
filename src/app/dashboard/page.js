@@ -16,6 +16,8 @@ export default function Dashboard() {
         }
     }, []);
 
+
+
     useEffect(() => {
         const checkAuth = async () => {
         const { data } = await supabase.auth.getSession();
@@ -27,21 +29,27 @@ export default function Dashboard() {
         checkAuth();
     }, []);
 
+    
+
     const handleLogout = async () => {
-        try {
-            const { error } = await supabase.auth.signOut();
+        const {
+            data: { session },
+        } = await supabase.auth.getSession();
 
-            // Sign out always clears the session—even if there's no active session.
-            // So it's safe to redirect afterward regardless of error.
-            window.location.href = "/login";
-
-            if (error) {
-            console.warn("Supabase logout error:", error.message);
+        console.log("the session is: ", session)
+        
+        if (session) { // only logout if in a valid session
+            try {
+                await supabase.auth.signOut(); // clears local session
+            } catch (err) {
+                console.warn("Supabase logout error:", err.message);
             }
-        } catch (err) {
-            console.error("Unexpected logout error:", err);
         }
+
+        window.location.href = "/login";
     };
+
+
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
@@ -54,12 +62,7 @@ export default function Dashboard() {
                 <p className="text-gray-600">Employee Scheduler Management</p>
                 </div>
                 <div className="flex items-center space-x-4">
-                <Button>Something A Button Would Say</Button>
-                <button
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                >
-                    New Schedule
-                </button>
+
                 {/* Logout Button */}
                 <button
                     onClick={handleLogout}
@@ -67,6 +70,7 @@ export default function Dashboard() {
                 >
                     Logout
                 </button>
+
                 </div>
             </div>
             </div>
