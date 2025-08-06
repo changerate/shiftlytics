@@ -1,51 +1,81 @@
 "use client";
-import { useRouter } from "next/navigation"; // Correct import for Next.js 13+ App Router
-import { useState } from "react";
+
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { supabase } from "../../../lib/supabaseClient";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const router = useRouter(); // Initialize the router
+  const [loading, setLoading] = useState(true); // Initial loading on mount
+  const router = useRouter();
 
-  // Mock user data
-  const mockUsers = [
-    { email: "user1@example.com", password: "password123" },
-    { email: "user2@example.com", password: "password456" },
-  ];
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        router.replace("/dashboard"); // Avoid back button weirdness
+      } else {
+        setLoading(false); // Done loading only if no session
+      }
+    };
+    checkSession();
+  }, []);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    // Check if user exists in mock data
-    const user = mockUsers.find(
-      (u) => u.email === email && u.password === password
-    );
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    if (user) {
-      setError("");
-      router.push("/dashboard"); // Navigate to /dashboard
+    if (error) {
+      setError(error.message || "Invalid email or password.");
+      setLoading(false);
     } else {
-      setError("Invalid email or password.");
+      router.push("/dashboard");
     }
   };
 
-  const handleGoogleLogin = () => {
-    alert("Google login functionality will be implemented later.");
+  const handleGoogleLogin = async () => {
+    setError("");
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
+    });
+
+    if (error) {
+      setError(error.message || "Google login failed.");
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Checking session...
+      </div>
+    );
+  }
 
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8"
-      style={{ backgroundColor: "#0d1321" }} // rich_black
+      style={{ backgroundColor: "#0d1321" }}
     >
       <div
         className="p-8 rounded-lg shadow-md w-full max-w-md sm:max-w-lg lg:max-w-xl"
-        style={{ backgroundColor: "#1d2d44" }} // prussian_blue
+        style={{ backgroundColor: "#1d2d44" }}
       >
         <h1
           className="text-2xl sm:text-3xl font-bold mb-6 text-center"
-          style={{ color: "#f0ebd8" }} // eggshell
+          style={{ color: "#f0ebd8" }}
         >
           Login
         </h1>
@@ -54,7 +84,7 @@ export default function LoginPage() {
             <label
               htmlFor="email"
               className="block text-sm sm:text-base font-medium"
-              style={{ color: "#c5d3e6" }} // prussian_blue-900
+              style={{ color: "#c5d3e6" }}
             >
               Email
             </label>
@@ -65,9 +95,9 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
               style={{
-                backgroundColor: "#3e5c76", // payne's_gray
-                borderColor: "#748cab", // silver_lake_blue
-                color: "#f0ebd8", // eggshell
+                backgroundColor: "#3e5c76",
+                borderColor: "#748cab",
+                color: "#f0ebd8",
               }}
               required
             />
@@ -76,7 +106,7 @@ export default function LoginPage() {
             <label
               htmlFor="password"
               className="block text-sm sm:text-base font-medium"
-              style={{ color: "#c5d3e6" }} // prussian_blue-900
+              style={{ color: "#c5d3e6" }}
             >
               Password
             </label>
@@ -87,9 +117,9 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
               style={{
-                backgroundColor: "#3e5c76", // payne's_gray
-                borderColor: "#748cab", // silver_lake_blue
-                color: "#f0ebd8", // eggshell
+                backgroundColor: "#3e5c76",
+                borderColor: "#748cab",
+                color: "#f0ebd8",
               }}
               required
             />
@@ -97,7 +127,7 @@ export default function LoginPage() {
           {error && (
             <p
               className="text-sm sm:text-base text-center"
-              style={{ color: "#d4dfe8" }} // silver_lake_blue-900
+              style={{ color: "#d4dfe8" }}
             >
               {error}
             </p>
@@ -106,11 +136,12 @@ export default function LoginPage() {
             type="submit"
             className="w-full py-2 px-4 rounded-lg font-medium transition-colors"
             style={{
-              backgroundColor: "#4260a6", // rich_black-700
-              color: "#f0ebd8", // eggshell
+              backgroundColor: "#4260a6",
+              color: "#f0ebd8",
             }}
+            disabled={loading}
           >
-            Log In
+            {loading ? "Logging in..." : "Log In"}
           </button>
         </form>
         <div className="mt-6 text-center">
@@ -118,8 +149,8 @@ export default function LoginPage() {
             onClick={handleGoogleLogin}
             className="w-full py-2 px-4 rounded-lg font-medium transition-colors"
             style={{
-              backgroundColor: "#547da0", // payne's_gray-600
-              color: "#f0ebd8", // eggshell
+              backgroundColor: "#547da0",
+              color: "#f0ebd8",
             }}
           >
             Log In with Google
