@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import TimeInput from "../../../components/TimeInput";
-import WageSelector from "../../../components/WageSelector";
+import CustomWageSelector from "../../../components/CustomWageSelector";
 
 
 
@@ -104,6 +104,20 @@ export default function AddShiftPage() {
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         required
+                        />
+                    </div>
+
+
+                    {/* Wage Selection */}
+                    <div>
+                        <label htmlFor="wageId" className="block text-sm font-medium text-gray-700 mb-2">
+                            Select Your Wage *
+                        </label>
+                        <CustomWageSelector
+                            name="wageId"
+                            value={shiftData.wageId}
+                            onChange={handleInputChange}
+                            required
                         />
                     </div>
 
@@ -210,18 +224,6 @@ export default function AddShiftPage() {
                     </div>
 
 
-                    {/* Wage Selection */}
-                    <div>
-                        <label htmlFor="wageId" className="block text-sm font-medium text-gray-700 mb-2">
-                            Wage *
-                        </label>
-                        <WageSelector
-                            name="wageId"
-                            value={shiftData.wageId}
-                            onChange={handleInputChange}
-                            required
-                        />
-                    </div>
                 </div>
 
 
