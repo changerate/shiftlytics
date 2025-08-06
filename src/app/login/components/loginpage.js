@@ -156,6 +156,21 @@ export default function LoginPage() {
             Log In with Google
           </button>
         </div>
+        <div className="mt-6 text-center">
+          <p
+            className="text-sm sm:text-base"
+            style={{ color: "#c5d3e6" }} // prussian_blue-900
+          >
+            Don't have an account yet?{" "}
+            <a
+              href="/signup"
+              className="font-medium"
+              style={{ color: "#547da0" }} // payne's_gray-600
+            >
+             Sign Up 
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );
