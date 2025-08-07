@@ -218,7 +218,7 @@ export default function SignUp() {
         </form>
         <div className="mt-6 text-center">
           <p
-            className="text-sm sm:text-base"
+            className="text-sm text-black sm:text-base"
           >
             Already have an account?{" "}
             <a
