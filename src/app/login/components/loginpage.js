@@ -135,7 +135,7 @@ export default function LoginPage() {
                     <div>
                         <label
                             htmlFor="email"
-                            className="block text-sm sm:text-base font-medium"
+                            className="block text-black text-sm sm:text-base font-medium"
                         >
                             Email
                         </label>
@@ -155,7 +155,7 @@ export default function LoginPage() {
                     <div>
                         <label
                             htmlFor="password"
-                            className="block text-sm sm:text-base font-medium"
+                            className="block text-black text-sm sm:text-base font-medium"
                             // style={{ color: "#c5d3e6" }}
                         >
                             Password
@@ -196,8 +196,8 @@ export default function LoginPage() {
                         onClick={handleGoogleLogin}
                         className="w-full py-2 px-4 rounded-lg font-medium transition-colors"
                         style={{
-                        backgroundColor: "#547da0",
-                        color: "#f0ebd8",
+                            backgroundColor: "#547da0",
+                            color: "#f0ebd8",
                         }}
                         disabled={loading}
                     >

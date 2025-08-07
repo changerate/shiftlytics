@@ -68,7 +68,7 @@ export default function SignUp() {
           <div>
             <label
               htmlFor="firstName"
-              className="block text-sm sm:text-base font-medium"
+              className="block text-sm text-black sm:text-base font-medium"
             >
               First Name
             </label>
@@ -87,7 +87,7 @@ export default function SignUp() {
           <div>
             <label
               htmlFor="lastName"
-              className="block text-sm sm:text-base font-medium"
+              className="block text-sm text-black sm:text-base font-medium"
             >
               Last Name
             </label>
@@ -106,7 +106,7 @@ export default function SignUp() {
           <div>
             <label
               htmlFor="company"
-              className="block text-sm sm:text-base font-medium"
+              className="block text-sm text-black sm:text-base font-medium"
             >
               Company
             </label>
@@ -125,7 +125,7 @@ export default function SignUp() {
           <div>
             <label
               htmlFor="position"
-              className="block text-sm sm:text-base font-medium"
+              className="block text-sm text-black sm:text-base font-medium"
             >
               Position
             </label>
@@ -144,7 +144,7 @@ export default function SignUp() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm sm:text-base font-medium"
+              className="block text-sm text-black sm:text-base font-medium"
             >
               Email
             </label>
@@ -163,7 +163,7 @@ export default function SignUp() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm sm:text-base font-medium"
+              className="block text-sm text-black sm:text-base font-medium"
             >
               Password
             </label>
@@ -182,7 +182,7 @@ export default function SignUp() {
           <div>
             <label
               htmlFor="confirmPassword"
-              className="block text-sm sm:text-base font-medium"
+              className="block text-sm text-black sm:text-base font-medium"
             >
               Confirm Password
             </label>
@@ -200,7 +200,7 @@ export default function SignUp() {
           </div>
           {error && (
             <p
-              className="text-sm sm:text-base text-center"
+              className="text-sm text-black sm:text-base text-center"
               style={{ color: "#d4dfe8" }} // silver_lake_blue-900
             >
               {error}
