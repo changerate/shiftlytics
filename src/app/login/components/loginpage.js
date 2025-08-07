@@ -6,6 +6,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 import { ensureUserProfile } from "../../../utils/profileUtils";
 
+
+
+
+
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -89,12 +93,17 @@ export default function LoginPage() {
         );
     }
 
+
+
+
+
+
     return (
         <div
             className="bg-background min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8"
         >
             <div
-                className="bg-primary-variant p-8 rounded-lg shadow-md w-full max-w-md sm:max-w-lg lg:max-w-xl"
+                className="p-8 rounded-lg shadow-md w-full max-w-md sm:max-w-lg lg:max-w-xl"
                 // style={{ backgroundColor: "#1d2d44" }}
             >
                 <h1
@@ -108,7 +117,6 @@ export default function LoginPage() {
                         <label
                             htmlFor="email"
                             className="block text-sm sm:text-base font-medium"
-                            // style={{ color: "#c5d3e6" }}
                         >
                             Email
                         </label>
@@ -119,9 +127,8 @@ export default function LoginPage() {
                             onChange={(e) => setEmail(e.target.value)}
                             className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm"
                             style={{
-                                    // backgroundColor: "#3e5c76",
-                                    borderColor: "#748cab",
-                                    color: "black",
+                                borderColor: "#748cab",
+                                color: "black",
                             }}
                             required
                         />
@@ -159,7 +166,7 @@ export default function LoginPage() {
                     <Button 
                         type='submit'
                         variant='primary'
-                        className='w-full py-2'
+                        className='w-full'
                         disabled={loading}
                     >
                         {loading ? "Logging in..." : "Log In"}
@@ -168,7 +175,7 @@ export default function LoginPage() {
                 <div className="mt-6 text-center">
                     <Button 
                         onClick={handleGoogleLogin}
-                        className="w-full my-2 py-2 px-4 rounded-lg font-medium transition-colors"
+                        className="w-full py-2 px-4 rounded-lg font-medium transition-colors"
                         style={{
                         backgroundColor: "#547da0",
                         color: "#f0ebd8",
@@ -183,7 +190,8 @@ export default function LoginPage() {
                         Don't have an account yet?{" "}
                         <a
                             href="/signup"
-                            className="text-black font-medium"
+                            className="font-medium"
+                            style={{ color: "#547da0" }} // payne's_gray-600
                         >
                             Sign Up 
                         </a>

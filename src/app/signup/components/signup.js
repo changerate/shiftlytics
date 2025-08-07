@@ -4,6 +4,8 @@ import { useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
+import Button from '../../../components/Button.js';
+
 export default function SignUp() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -39,16 +41,13 @@ export default function SignUp() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8"
-      style={{ backgroundColor: "#0d1321" }} // rich_black
+      className="bg-background min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8"
     >
       <div
         className="p-8 rounded-lg shadow-md w-full max-w-md sm:max-w-lg lg:max-w-xl"
-        style={{ backgroundColor: "#1d2d44" }} // prussian_blue
       >
         <h1
-          className="text-2xl sm:text-3xl font-bold mb-6 text-center"
-          style={{ color: "#f0ebd8" }} // eggshell
+          className="text-text-primary text-2xl sm:text-3xl font-bold mb-6 text-center"
         >
           Sign Up
         </h1>
@@ -57,7 +56,6 @@ export default function SignUp() {
             <label
               htmlFor="firstName"
               className="block text-sm sm:text-base font-medium"
-              style={{ color: "#c5d3e6" }} // prussian_blue-900
             >
               First Name
             </label>
@@ -68,9 +66,7 @@ export default function SignUp() {
               onChange={(e) => setFirstName(e.target.value)}
               className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
               style={{
-                backgroundColor: "#3e5c76", // payne's_gray
                 borderColor: "#748cab", // silver_lake_blue
-                color: "#f0ebd8", // eggshell
               }}
               required
             />
@@ -79,7 +75,6 @@ export default function SignUp() {
             <label
               htmlFor="lastName"
               className="block text-sm sm:text-base font-medium"
-              style={{ color: "#c5d3e6" }} // prussian_blue-900
             >
               Last Name
             </label>
@@ -90,9 +85,7 @@ export default function SignUp() {
               onChange={(e) => setLastName(e.target.value)}
               className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
               style={{
-                backgroundColor: "#3e5c76", // payne's_gray
                 borderColor: "#748cab", // silver_lake_blue
-                color: "#f0ebd8", // eggshell
               }}
               required
             />
@@ -101,7 +94,6 @@ export default function SignUp() {
             <label
               htmlFor="company"
               className="block text-sm sm:text-base font-medium"
-              style={{ color: "#c5d3e6" }} // prussian_blue-900
             >
               Company
             </label>
@@ -112,9 +104,7 @@ export default function SignUp() {
               onChange={(e) => setCompany(e.target.value)}
               className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
               style={{
-                backgroundColor: "#3e5c76", // payne's_gray
                 borderColor: "#748cab", // silver_lake_blue
-                color: "#f0ebd8", // eggshell
               }}
               required
             />
@@ -123,7 +113,6 @@ export default function SignUp() {
             <label
               htmlFor="position"
               className="block text-sm sm:text-base font-medium"
-              style={{ color: "#c5d3e6" }} // prussian_blue-900
             >
               Position
             </label>
@@ -134,9 +123,7 @@ export default function SignUp() {
               onChange={(e) => setPosition(e.target.value)}
               className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
               style={{
-                backgroundColor: "#3e5c76", // payne's_gray
                 borderColor: "#748cab", // silver_lake_blue
-                color: "#f0ebd8", // eggshell
               }}
               required
             />
@@ -145,7 +132,6 @@ export default function SignUp() {
             <label
               htmlFor="email"
               className="block text-sm sm:text-base font-medium"
-              style={{ color: "#c5d3e6" }} // prussian_blue-900
             >
               Email
             </label>
@@ -156,9 +142,7 @@ export default function SignUp() {
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
               style={{
-                backgroundColor: "#3e5c76", // payne's_gray
                 borderColor: "#748cab", // silver_lake_blue
-                color: "#f0ebd8", // eggshell
               }}
               required
             />
@@ -167,7 +151,6 @@ export default function SignUp() {
             <label
               htmlFor="password"
               className="block text-sm sm:text-base font-medium"
-              style={{ color: "#c5d3e6" }} // prussian_blue-900
             >
               Password
             </label>
@@ -178,9 +161,7 @@ export default function SignUp() {
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
               style={{
-                backgroundColor: "#3e5c76", // payne's_gray
                 borderColor: "#748cab", // silver_lake_blue
-                color: "#f0ebd8", // eggshell
               }}
               required
             />
@@ -189,7 +170,6 @@ export default function SignUp() {
             <label
               htmlFor="confirmPassword"
               className="block text-sm sm:text-base font-medium"
-              style={{ color: "#c5d3e6" }} // prussian_blue-900
             >
               Confirm Password
             </label>
@@ -200,9 +180,7 @@ export default function SignUp() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
               style={{
-                backgroundColor: "#3e5c76", // payne's_gray
                 borderColor: "#748cab", // silver_lake_blue
-                color: "#f0ebd8", // eggshell
               }}
               required
             />
@@ -215,22 +193,19 @@ export default function SignUp() {
               {error}
             </p>
           )}
-          <button
-            type="submit"
-            className="w-full py-2 px-4 rounded-lg font-medium transition-colors"
-            style={{
-              backgroundColor: "#4260a6", // rich_black-700
-              color: "#f0ebd8", // eggshell
-            }}
-            disabled={loading}
-          >
-            {loading ? "Signing up..." : "Sign Up"}
-          </button>
+            <Button
+                type="submit"
+                className="w-full py-2 px-4 rounded-lg font-medium transition-colors"
+                disabled={loading}
+            >
+                {loading ? "Signing up..." : "Sign Up"}
+          </Button>
+
+
         </form>
         <div className="mt-6 text-center">
           <p
             className="text-sm sm:text-base"
-            style={{ color: "#c5d3e6" }} // prussian_blue-900
           >
             Already have an account?{" "}
             <a
