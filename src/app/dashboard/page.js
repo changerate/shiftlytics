@@ -1,5 +1,6 @@
 "use client";
 import Button from '../../components/Button';
+import TimeDataView from '../../components/TimeDataView';
 import { useEffect } from "react";
 import { supabase } from '../../lib/supabaseClient';
 
@@ -52,6 +53,12 @@ export default function Dashboard() {
         window.location.href = "/login";
     };
 
+    const handleTimeRangeChange = (dateRange) => {
+        console.log('Time range changed:', dateRange);
+        // TODO: Implement data fetching based on selected time range
+        // This will be useful when you integrate with your data source
+    };
+
 
 
     return (
@@ -95,9 +102,10 @@ export default function Dashboard() {
                 </div>
 
                 {/* Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <p className='text-primary text-sm w-full mx-auto'>Maybe this content grid could be useful!?</p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     {/* Recent Shifts */}
-                    <div className="bg-white p-6 rounded-lg shadow-sm border">
+                    <div className="bg-white p-6 rounded-lg shadow-sm border border-accent">
                         <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Shifts</h2>
                         <div className="space-y-4">
                         {/* ...existing code... */}
@@ -105,13 +113,22 @@ export default function Dashboard() {
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="bg-white p-6 rounded-lg shadow-sm border">
+                    <div className="bg-white p-6 rounded-lg shadow-sm border border-accent">
                         <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
                         <div className="space-y-3">
                         {/* ...existing code... */}
                         </div>
                     </div>
                 </div>
+
+                {/* Time Data Analytics Section */}
+                <TimeDataView 
+                    title="Recent Shifts"
+                    onTimeRangeChange={handleTimeRangeChange}
+                    defaultTimeRange="last30days"
+                    className="mb-8"
+                />
+
             </main>
         </div>
     );
