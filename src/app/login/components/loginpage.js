@@ -4,7 +4,7 @@ import Button from '../../../components/Button';
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabaseClient";
-import { ensureUserProfile } from "../../../utils/profileUtils";
+import { ensureUserProfile, updateUserProfile } from "../../../utils/profileUtils";
 
 
 
@@ -49,8 +49,27 @@ export default function LoginPage() {
         
         if (user) {
             // Ensure user profile exists using utility function
-            const profileResult = await ensureUserProfile(user);
+            const profileResult = await ensureUserProfile(user); 
+            if (!profileResult.success) {
+                /**
+                 * Meta data from user auth table
+                 */
+                const userdataobj = {
+                    useremail : user.email,
+                    usermetadata : user.user_metadata,
+                    userfirstname : usermetadata.first_name,
+                    userlastname : usermetadata.last_name,
+                    usercompany : usermetadata.company,
+                    userposition : usermetadata.position,
+                }
+                // send to profile table
+                const updateResult = await updateUserProfile(user.id, userdataobj);
+            }
+        
+
             
+
+          //  console.log('User data:', userdataobj);
             if (!profileResult.success) {
             console.error('Profile handling failed:', profileResult.error);
             setError(profileResult.error);
