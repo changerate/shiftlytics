@@ -55,63 +55,64 @@ export default function Dashboard() {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans">
+        <div className="min-h-screen bg-background font-sans">
         {/* Header */}
-        <header className="bg-white shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center py-6">
-                    <div>
-                        <h1 className="text-3xl font-bold text-primary">Welcome</h1>
-                        <p className="text-primary">Personal Work Schedule Managment</p>
-                    </div>
-                    <div className="flex items-center space-x-4">
+            <header className="bg-surface shadow-sm border-b border-border-light">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center py-6">
+                        <div>
+                            <h1 className="text-3xl font-bold text-text-primary">Welcome</h1>
+                            <p className="text-text-secondary">Personal Work Schedule Management</p>
+                        </div>
+                        <div className="flex items-center space-x-4">
 
-                        {/* Add New Shift */}
-                        <Button 
-                            onClick={() => window.location.href = "/addShift"}
-                        >
-                            Add New Shift
-                        </Button>
+                            {/* Add New Shift */}
+                            <Button 
+                                onClick={() => window.location.href = "/addShift"}
+                                variant="primary"
+                            >
+                                Add New Shift
+                            </Button>
 
-                        {/* Logout Button */}
-                        <Button
-                            onClick={handleLogout}
-                            variant='noOutline'
-                        >
-                            Logout
-                        </Button>
+                            {/* Logout Button */}
+                            <Button
+                                onClick={handleLogout}
+                                variant='noOutlineBlack'
+                            >
+                                Logout
+                            </Button>
 
+                        </div>
                     </div>
                 </div>
-            </div>
-        </header>
+            </header>
 
-        {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {/* ...existing code... */}
-            </div>
-
-            {/* Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Recent Activities */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Activities</h2>
-                <div className="space-y-4">
+            {/* Main Content */}
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {/* ...existing code... */}
                 </div>
-            </div>
 
-            {/* Quick Actions */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
-                <div className="space-y-3">
-                {/* ...existing code... */}
+                {/* Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Recent Shifts */}
+                    <div className="bg-white p-6 rounded-lg shadow-sm border">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Shifts</h2>
+                        <div className="space-y-4">
+                        {/* ...existing code... */}
+                        </div>
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="bg-white p-6 rounded-lg shadow-sm border">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+                        <div className="space-y-3">
+                        {/* ...existing code... */}
+                        </div>
+                    </div>
                 </div>
-            </div>
-            </div>
-        </main>
+            </main>
         </div>
     );
 }

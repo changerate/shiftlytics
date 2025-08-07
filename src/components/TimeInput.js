@@ -78,7 +78,7 @@ export default function TimeInput({
         <div className={`relative ${className}`}>
 
             {/* Container for minus, plus, and time */}
-            <div className='py-5 flex flex-row w-full items-center justify-center gap-8 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors'>
+            <div className='py-5 px-7 flex flex-row w-full items-center justify-center gap-8 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors'>
                 
                 {/* Minute control for adding a minute */}
                 <div className="flex flex-col">

@@ -117,7 +117,7 @@ export default function AddShiftPage() {
                     {/* Form Content */}
                     <form onSubmit={handleSubmit} className="p-6">
                         {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> */}
-                        <div className="flex flex-col gap-12 w-full md:w-1/2 lg:w-1/3 mx-auto">
+                        <div className="flex flex-col gap-12 w-full md:w-1/2 lg:w-1/2 mx-auto">
 
 
                             {/* Date */}
@@ -154,14 +154,14 @@ export default function AddShiftPage() {
                             {/* Clock In */}
                             <div>
                                 <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-2">
-                                Clock In *
+                                    Clock In *
                                 </label>
                                 <TimeInput
-                                id="startTime"
-                                name="startTime"
-                                value={shiftData.startTime}
-                                onChange={handleInputChange}
-                                required
+                                    id="startTime"
+                                    name="startTime"
+                                    value={shiftData.startTime}
+                                    onChange={handleInputChange}
+                                    required
                                 />
                             </div>
 
@@ -169,14 +169,14 @@ export default function AddShiftPage() {
                             {/* Clock Out */}
                             <div>
                                 <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-2">
-                                Clock Out *
+                                    Clock Out *
                                 </label>
                                 <TimeInput
-                                id="endTime"
-                                name="endTime"
-                                value={shiftData.endTime}
-                                onChange={handleInputChange}
-                                required
+                                    id="endTime"
+                                    name="endTime"
+                                    value={shiftData.endTime}
+                                    onChange={handleInputChange}
+                                    required
                                 />
                             </div>
 
