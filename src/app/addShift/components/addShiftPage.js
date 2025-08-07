@@ -122,7 +122,7 @@ export default function AddShiftPage() {
 
                             {/* Date */}
                             <div>
-                                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="date" className="block text-neutral-700 text-sm font-medium text-gray-700 mb-2">
                                 Date *
                                 </label>
                                 <input
@@ -139,7 +139,7 @@ export default function AddShiftPage() {
 
                             {/* Wage Selection */}
                             <div>
-                                <label htmlFor="wageId" className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="wageId" className="block text-neutral-700 text-sm font-medium text-gray-700 mb-2">
                                     Select Your Wage *
                                 </label>
                                 <CustomWageSelector
@@ -153,7 +153,7 @@ export default function AddShiftPage() {
 
                             {/* Clock In */}
                             <div>
-                                <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="startTime" className="block text-neutral-700 text-sm font-medium text-gray-700 mb-2">
                                     Clock In *
                                 </label>
                                 <TimeInput
@@ -168,7 +168,7 @@ export default function AddShiftPage() {
 
                             {/* Clock Out */}
                             <div>
-                                <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="endTime" className="block text-neutral-700 text-sm font-medium text-gray-700 mb-2">
                                     Clock Out *
                                 </label>
                                 <TimeInput
@@ -207,7 +207,7 @@ export default function AddShiftPage() {
 
                             {/* Lunch In */}
                             <div className={! shiftData.addLunch ? 'opacity-50 pointer-events-none' : ''}>
-                                <label htmlFor="lunchInTime" className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="lunchInTime" className="block text-neutral-700 text-sm font-medium text-gray-700 mb-2">
                                     Lunch In {shiftData.addLunch && '*'}
                                 </label>
                                 <TimeInput
@@ -222,7 +222,7 @@ export default function AddShiftPage() {
 
                             {/* Lunch Out */}
                             <div className={! shiftData.addLunch ? 'opacity-50 pointer-events-none' : ''}>
-                                <label htmlFor="lunchOutTime" className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="lunchOutTime" className="block text-neutral-700 text-sm font-medium text-gray-700 mb-2">
                                     Lunch Out {shiftData.addLunch && '*'}
                                 </label>
                                 <TimeInput
@@ -238,7 +238,7 @@ export default function AddShiftPage() {
 
                             {/* Notes - Full Width */}
                             <div className="mt-6">
-                                <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="notes" className="block text-neutral-700 text-sm font-medium text-gray-700 mb-2">
                                     Notes
                                 </label>
                                 <textarea
