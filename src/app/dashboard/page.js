@@ -1,7 +1,10 @@
 "use client";
-import Button from './components/Button';
+import Button from '../../components/Button';
 import { useEffect } from "react";
 import { supabase } from '../../lib/supabaseClient';
+
+
+
 
 export default function Dashboard() {
     useEffect(() => {
@@ -54,12 +57,12 @@ export default function Dashboard() {
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b">
+        <header className="bg-white shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center py-6">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-                        <p className="text-gray-600">Employee Scheduler Management</p>
+                        <h1 className="text-3xl font-bold text-primary">Welcome</h1>
+                        <p className="text-primary">Personal Work Schedule Managment</p>
                     </div>
                     <div className="flex items-center space-x-4">
 
@@ -73,7 +76,7 @@ export default function Dashboard() {
                         {/* Logout Button */}
                         <Button
                             onClick={handleLogout}
-                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            variant='noOutline'
                         >
                             Logout
                         </Button>
