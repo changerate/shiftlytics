@@ -47,41 +47,41 @@ export default function LoginPage() {
         } else {
             const user = data.user;
         
-        if (user) {
-            // Ensure user profile exists using utility function
-            const profileResult = await ensureUserProfile(user); 
-            if (!profileResult.success) {
-                /**
-                 * Meta data from user auth table
-                 */
-                const userdataobj = {
-                    useremail : user.email,
-                    usermetadata : user.user_metadata,
-                    userfirstname : usermetadata.first_name,
-                    userlastname : usermetadata.last_name,
-                    usercompany : usermetadata.company,
-                    userposition : usermetadata.position,
+            if (user) {
+                // Ensure user profile exists using utility function
+                const profileResult = await ensureUserProfile(user); 
+                if (!profileResult.success) {
+                    /**
+                     * Meta data from user auth table
+                     */
+                    const userdataobj = {
+                        useremail: user.email,
+                        usermetadata: user.user_metadata,
+                        userfirstname: usermetadata.first_name,
+                        userlastname: usermetadata.last_name,
+                        usercompany: usermetadata.company,
+                        userposition: usermetadata.position,
+                    }
+                    // send to profile table
+                    const updateResult = await updateUserProfile(user.id, userdataobj);
                 }
-                // send to profile table
-                const updateResult = await updateUserProfile(user.id, userdataobj);
-            }
-        
-
             
 
-          //  console.log('User data:', userdataobj);
-            if (!profileResult.success) {
-            console.error('Profile handling failed:', profileResult.error);
-            setError(profileResult.error);
+                
+
+                //  console.log('User data:', userdataobj);
+                if (!profileResult.success) {
+                    console.error('Profile handling failed:', profileResult.error);
+                    setError(profileResult.error);
+                    setLoading(false);
+                    return;
+                }
+                
+                console.log('Profile ready:', profileResult.profile);
+            }
+            
             setLoading(false);
-            return;
-            }
-            
-            console.log('Profile ready:', profileResult.profile);
-        }
-        
-        setLoading(false);
-        router.push("/dashboard");
+            router.push("/dashboard");
         }
     };
 
@@ -91,14 +91,14 @@ export default function LoginPage() {
         setError("");
 
         const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-            redirectTo: `${window.location.origin}/dashboard`,
-        },
+            provider: "google",
+            options: {
+                redirectTo: `${window.location.origin}/dashboard`,
+            },
         });
 
         if (error) {
-        setError(error.message || "Google login failed.");
+            setError(error.message || "Google login failed.");
         }
         // Note: Profile creation for OAuth will be handled by the auth state change listener
         // or in a separate callback page
