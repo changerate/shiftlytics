@@ -30,13 +30,26 @@ export default function SignUp() {
   const { data, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        company,
+        position,
+      },
+    },
   });
+
+  if (signUpError) {
+    setError(signUpError.message);
+    setLoading(false);
+    return;
+  }
 
   alert("Sign-up successful! Please check your email to confirm your account.");
   setLoading(false);
   router.push("/login");
 };
-
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8"
