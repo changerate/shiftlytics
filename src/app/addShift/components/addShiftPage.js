@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import TimeInput from "../../../components/TimeInput";
 import CustomWageSelector from "../../../components/CustomWageSelector";
-import { createShift, validateShiftTimes } from "../../../utils/shiftUtils";
+import { createShift, validateShiftTimes } from "../../../utils/shiftUtils.js";
 import { supabase } from "../../../lib/supabaseClient";
 
 

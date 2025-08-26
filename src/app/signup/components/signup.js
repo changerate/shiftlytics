@@ -29,26 +29,25 @@ export default function SignUp() {
 
   setLoading(true);
 
-  const { data, error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        first_name: firstName,
-        last_name: lastName,
-        company,
-        position,
-      },
-    },
+ const res = await fetch("/api/signup", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      email,
+      password,
+      first_name: firstName,
+      last_name: lastName,
+      company,
+      position
+    }),
   });
-
-  if (signUpError) {
-    setError(signUpError.message);
+  const result = await res.json();
+  if (!result.ok) {
+    setError(result.error);
     setLoading(false);
     return;
   }
-
-  alert("Sign-up successful! Please check your email to confirm your account.");
+  alert(result.message);
   setLoading(false);
   router.push("/login");
 };
