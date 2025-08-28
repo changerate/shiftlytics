@@ -1,13 +1,18 @@
 "use client";
+// migrating new dashboard from "the graph" branch
 import Button from '../../components/Button';
 import TimeDataView from '../../components/TimeDataView';
-import { useEffect } from "react";
+import GraphDemo from '../../components/GraphDemo';
+import ShiftsGraph from '../../components/ShiftsGraph';
+import { useEffect, useState } from "react";
 import { supabase } from '../../lib/supabaseClient';
 
 
 
 
 export default function Dashboard() {
+    const [currentTimeRange, setCurrentTimeRange] = useState(null);
+    
     useEffect(() => {
         // Capture and clean up OAuth token hash from URL after Google login
         const hash = window.location.hash;
@@ -53,10 +58,11 @@ export default function Dashboard() {
         window.location.href = "/login";
     };
 
+
+
     const handleTimeRangeChange = (dateRange) => {
         console.log('Time range changed:', dateRange);
-        // TODO: Implement data fetching based on selected time range
-        // This will be useful when you integrate with your data source
+        setCurrentTimeRange(dateRange);
     };
 
 
@@ -121,13 +127,28 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Time Data Analytics Section */}
+
+
+                {/* Time Data Analytics Section with Stale-While-Revalidate Graph */}
                 <TimeDataView 
-                    title="Recent Shifts"
+                    title="Shifts Analytics"
                     onTimeRangeChange={handleTimeRangeChange}
                     defaultTimeRange="last30days"
                     className="mb-8"
-                />
+                >
+                    <ShiftsGraph 
+                        timeRange={currentTimeRange}
+                        chartType="line"
+                        refreshInterval={30000}
+                        className="m-4"
+                    />
+                </TimeDataView>
+
+                {/* Additional Graph Demo Section */}
+                <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-text-primary mb-6">Stale-While-Revalidate Graph Demo</h2>
+                    <GraphDemo timeRange={currentTimeRange} />
+                </div>
 
             </main>
         </div>
