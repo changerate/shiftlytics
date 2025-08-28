@@ -6,12 +6,20 @@ import GraphDemo from '../../components/GraphDemo';
 import ShiftsGraph from '../../components/ShiftsGraph';
 import { useEffect, useState } from "react";
 import { supabase } from '../../lib/supabaseClient';
+import ProfileCompletionPrompt from '../../components/ProfileCompletionPrompt';
+import ProfilePanel from '../../components/ProfilePanel';
+import { getUserWages } from '../../utils/wageUtils';
+import { getUserProfile } from '../../utils/profileUtils';
 
 
 
 
 export default function Dashboard() {
     const [currentTimeRange, setCurrentTimeRange] = useState(null);
+    const [showProfilePrompt, setShowProfilePrompt] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [showProfilePanel, setShowProfilePanel] = useState(false);
+    const [greetingName, setGreetingName] = useState('');
     
     useEffect(() => {
         // Capture and clean up OAuth token hash from URL after Google login
@@ -28,14 +36,38 @@ export default function Dashboard() {
 
 
     useEffect(() => {
-        const checkAuth = async () => {
-        const { data } = await supabase.auth.getSession();
-        if (!data.session) {
-            window.location.href = "/login";
-        }
+        const init = async () => {
+            const { data } = await supabase.auth.getSession();
+            if (!data.session) {
+                window.location.href = "/login";
+                return;
+            }
+
+            // Get user and check wages to decide if we should prompt
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            setCurrentUser(user);
+
+            try {
+                const res = await getUserWages(user.id);
+                if (res.success && (res.wages?.length ?? 0) === 0) {
+                    setShowProfilePrompt(true);
+                }
+                // personalize greeting
+                const prof = await getUserProfile(user.id);
+                if (prof.success && prof.profile) {
+                    const fn = prof.profile.first_name || user.email?.split('@')[0] || 'Welcome';
+                    setGreetingName(fn);
+                } else {
+                    setGreetingName(user.email?.split('@')[0] || 'Welcome');
+                }
+            } catch (e) {
+                // non-fatal; just skip prompt on error
+                console.warn('Failed checking wages:', e?.message);
+            }
         };
 
-        checkAuth();
+        init();
     }, []);
 
     
@@ -69,15 +101,37 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-background font-sans">
+        {showProfilePrompt && (
+            <ProfileCompletionPrompt
+                isOpen={showProfilePrompt}
+                onClose={() => setShowProfilePrompt(false)}
+                userId={currentUser?.id}
+                onCreated={() => setShowProfilePrompt(false)}
+            />
+        )}
+        {showProfilePanel && (
+            <ProfilePanel
+                isOpen={showProfilePanel}
+                onClose={() => setShowProfilePanel(false)}
+                userId={currentUser?.id}
+            />
+        )}
         {/* Header */}
             <header className="bg-surface shadow-sm border-b border-border-light">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center py-6">
                         <div>
-                            <h1 className="text-3xl font-bold text-text-primary">Welcome</h1>
+                            <h1 className="text-3xl font-bold text-text-primary">{`Welcome${greetingName ? `, ${greetingName}` : ''}`}</h1>
                             <p className="text-text-secondary">Personal Work Schedule Management</p>
                         </div>
                         <div className="flex items-center space-x-4">
+                            {/* My Profile */}
+                            <Button 
+                                onClick={() => setShowProfilePanel(true)}
+                                variant="secondary"
+                            >
+                                My Profile
+                            </Button>
 
                             {/* Add New Shift */}
                             <Button 
