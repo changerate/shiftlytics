@@ -193,18 +193,13 @@ export default function Dashboard() {
                     className="mb-8"
                 >
                     <ShiftsGraph 
-                        timeRange={currentTimeRange}
+                        dateRange={currentTimeRange}
                         chartType="line"
                         refreshInterval={30000}
                         className="m-4"
                     />
                 </TimeDataView>
 
-                {/* Additional Graph Demo Section */}
-                <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-text-primary mb-6">Stale-While-Revalidate Graph Demo</h2>
-                    <GraphDemo timeRange={currentTimeRange} />
-                </div>
             </main>
             
         </div>
