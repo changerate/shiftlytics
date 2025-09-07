@@ -42,6 +42,7 @@ export default function LoginPage() {
 
   setLoading(false);
   router.push("/dashboard");
+  console.log("router:"+ router);
 };
 
 

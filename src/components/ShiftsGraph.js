@@ -14,13 +14,35 @@ const ShiftsGraph = ({
     refreshInterval = 30000, // 30 seconds
     className = '' 
 }) => {
-    // Fetcher function that calls our API
+    // Fetcher function that calls our API (more robust error handling)
     const fetcher = async () => {
-        const response = await fetch('/api/data');
-        if (!response.ok) {
-            throw new Error(`Failed to fetch: ${response.status}`);
+        try {
+            const url = typeof window !== 'undefined'
+                ? new URL('/api/data', window.location.origin).toString()
+                : '/api/data';
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { Accept: 'application/json' },
+                credentials: 'same-origin',
+                cache: 'no-store',
+            });
+
+            const tryParseJson = async () => {
+                try { return await response.clone().json(); } catch { return null; }
+            };
+
+            if (!response.ok) {
+                const body = await tryParseJson();
+                const extra = body ? ` - ${JSON.stringify(body).slice(0, 200)}` : '';
+                throw new Error(`HTTP ${response.status}${extra}`);
+            }
+
+            return await response.json();
+        } catch (err) {
+            const msg = err?.message || 'Network error';
+            throw new Error(`Failed to fetch /api/data: ${msg}`);
         }
-        return response.json();
     };
 
     // Use our custom stale-while-revalidate hook

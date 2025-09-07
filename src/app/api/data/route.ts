@@ -1,10 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-)
-
 
 
 
@@ -43,6 +38,11 @@ function generateSampleData() {
 
 export async function GET(request: Request) {
     try {
+        // Initialize Supabase inside handler so any errors are caught
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
+        );
         // Optional filter by userId (query param)
         const { searchParams } = new URL(request.url);
         const userId = searchParams.get('userId');
@@ -57,19 +57,19 @@ export async function GET(request: Request) {
         
         if (error) {
             console.warn('Supabase error, falling back to sample data:', error.message);
-            return Response.json(generateSampleData());
+            return Response.json(generateSampleData(), { headers: { 'Cache-Control': 'no-store' } });
         }
         
         // If no data exists, return sample data
         if (!data || data.length === 0) {
             console.log('No data found in database, returning sample data');
-            return Response.json(generateSampleData());
+            return Response.json(generateSampleData(), { headers: { 'Cache-Control': 'no-store' } });
         }
         
-        return Response.json(data);
+        return Response.json(data, { headers: { 'Cache-Control': 'no-store' } });
     } catch (error) {
         console.error('API error:', error);
         // Fallback to sample data on any error
-        return Response.json(generateSampleData());
+        return Response.json(generateSampleData(), { headers: { 'Cache-Control': 'no-store' } });
     }
 }
