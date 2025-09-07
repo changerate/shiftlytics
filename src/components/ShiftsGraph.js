@@ -134,10 +134,9 @@ export default function ShiftsGraph({ dateRange, defaultRate = 0 }) {
     });
   }, [shifts, dateRange?.startDate, dateRange?.endDate]);
 
-  // ---------- aggregate per day ----------
+  // ---------- aggregate per day (earnings, hours, roles) ----------
   const aggregatedByDay = useMemo(() => {
     const day = new Map();
-
     for (const row of filtered) {
       const d = new Date(row.clock_in);
       if (Number.isNaN(d.getTime())) continue;
@@ -161,7 +160,7 @@ export default function ShiftsGraph({ dateRange, defaultRate = 0 }) {
       let earned = 0;
       if (occ === "hourly") earned = hours * rate;
       else if (occ === "per_shift" || occ === "flat" || occ === "shift") earned = rate;
-      else if (occ === "per_day" || occ === "daily") earned = rate; // once per day, simplified
+      else if (occ === "per_day" || occ === "daily") earned = rate; // simple per-day stipend
       else earned = hours * rate;
 
       const prev = day.get(dayKey) || { hours: 0, earnings: 0, roles: new Set() };
@@ -196,6 +195,24 @@ export default function ShiftsGraph({ dateRange, defaultRate = 0 }) {
   const allZero = paddedChartData.length > 0 && paddedChartData.every(d => d.earnings === 0 && d.hours === 0);
   const rangeText = humanizeRange(dateRange);
 
+  // ---------- custom tooltip to show earnings + hours + roles ----------
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (!active || !payload || !payload.length) return null;
+    const p = payload[0]?.payload || {};
+    return (
+      <div className="rounded-md border border-border-light bg-surface p-3 shadow-sm">
+        <div className="text-sm font-semibold text-text-primary">{label}</div>
+        <div className="mt-1 text-sm text-text-secondary">
+          Role{(p.roles || "").includes(",") ? "s" : ""}: {p.roles || "—"}
+        </div>
+        <div className="mt-2 text-sm">
+          <div>Earnings: ${Number(p.earnings).toFixed(2)}</div>
+          <div>Hours: {Number(p.hours).toFixed(2)}</div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div style={{ width: "100%", height: 420 }}>
       {loading && <p>Loading…</p>}
@@ -228,19 +245,9 @@ export default function ShiftsGraph({ dateRange, defaultRate = 0 }) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" interval="preserveStartEnd" minTickGap={20} />
             <YAxis yAxisId="left" tickFormatter={(v) => `$${Number(v).toFixed(0)}`} />
-            <Tooltip
-              formatter={(value, name, props) => {
-                if (name === "Earnings") return [`$${Number(value).toFixed(2)}`, name];
-                if (name === "Hours") return [Number(value).toFixed(2), name];
-                return [value, name];
-              }}
-              labelFormatter={(label, payload) => {
-                const roles = payload?.[0]?.payload?.roles || "";
-                return `${label} — Role: ${roles}`;
-              }}
-            />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <Bar yAxisId="left" dataKey="earnings" name="Earnings" fill="#8884d8" />
+            <Bar yAxisId="left" dataKey="earnings" name="Earnings" />
           </BarChart>
         </ResponsiveContainer>
       )}
