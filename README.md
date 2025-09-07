@@ -1,5 +1,5 @@
 ## Viewing: 
-Go to [https://personal-employee-scheduler.vercel.app/dashboard](https://personal-employee-scheduler.vercel.app/dashboard).
+Go to [https://personal-employee-scheduler.vercel.app/dashboard](https://personal-employee-scheduler.vercel.app/login).
 
 ## Getting Started for Dev
 
