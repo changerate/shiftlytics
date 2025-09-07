@@ -41,10 +41,19 @@ function generateSampleData() {
 
 
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
+        // Optional filter by userId (query param)
+        const { searchParams } = new URL(request.url);
+        const userId = searchParams.get('userId');
+
         // Try to fetch real data from Supabase
-        const { data, error } = await supabase.from('shifts').select('*');
+        let query = supabase.from('shifts').select('*');
+        if (userId) {
+            // Assuming the column is 'user_id' in the 'shifts' table
+            query = query.eq('user_id', userId);
+        }
+        const { data, error } = await query;
         
         if (error) {
             console.warn('Supabase error, falling back to sample data:', error.message);

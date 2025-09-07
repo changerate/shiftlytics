@@ -10,6 +10,7 @@ import ProfileCompletionPrompt from '../../components/ProfileCompletionPrompt';
 import ProfilePanel from '../../components/ProfilePanel';
 import { getUserWages } from '../../utils/wageUtils';
 import { getUserProfile } from '../../utils/profileUtils';
+import Test from '../../components/test';
 
 
 
@@ -169,6 +170,7 @@ export default function Dashboard() {
                         <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Shifts</h2>
                         <div className="space-y-4">
                         {/* ...existing code... */}
+                        <Test />
                         </div>
                     </div>
 
@@ -203,8 +205,8 @@ export default function Dashboard() {
                     <h2 className="text-2xl font-bold text-text-primary mb-6">Stale-While-Revalidate Graph Demo</h2>
                     <GraphDemo timeRange={currentTimeRange} />
                 </div>
-
             </main>
+            
         </div>
     );
 }
