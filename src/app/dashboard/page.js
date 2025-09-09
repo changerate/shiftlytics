@@ -4,6 +4,7 @@ import Button from '../../components/Button';
 import TimeDataView from '../../components/TimeDataView';
 import GraphDemo from '../../components/GraphDemo';
 import ShiftsGraph from '../../components/ShiftsGraph';
+import Heatmap from '../../components/Heatmap';
 import { useEffect, useState } from "react";
 import { supabase } from '../../lib/supabaseClient';
 import ProfileCompletionPrompt from '../../components/ProfileCompletionPrompt';
@@ -11,6 +12,7 @@ import ProfilePanel from '../../components/ProfilePanel';
 import { getUserWages } from '../../utils/wageUtils';
 import { getUserProfile } from '../../utils/profileUtils';
 import Test from '../../components/test';
+import { ShiftsProvider } from '../../context/ShiftsContext';
 
 
 
@@ -156,10 +158,10 @@ export default function Dashboard() {
             </header>
 
             {/* Main Content */}
+            <ShiftsProvider>
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {/* ...existing code... */}
                 </div>
 
                 {/* Content Grid */}
@@ -169,7 +171,6 @@ export default function Dashboard() {
                     <div className="bg-white p-6 rounded-lg shadow-sm border border-accent">
                         <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Shifts</h2>
                         <div className="space-y-4">
-                        {/* ...existing code... */}
                         <Test />
                         </div>
                     </div>
@@ -199,8 +200,15 @@ export default function Dashboard() {
                         className="m-4"
                     />
                 </TimeDataView>
+                {/*standard box for heatmap*/}
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-accent mt-8">
+                   <Heatmap />
+                   
+                </div>
+                
 
             </main>
+            </ShiftsProvider>
             
         </div>
     );
