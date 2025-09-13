@@ -26,7 +26,6 @@ export function ShiftsProvider({ children }) {
       }
       setUser(currentUser);
 
-      // Fetch shifts for this user
       const res = await fetch(`/api/data?userId=${encodeURIComponent(currentUser.id)}`, {
         cache: "no-store",
       });
@@ -36,10 +35,8 @@ export function ShiftsProvider({ children }) {
       const json = await res.json();
       if (!abortRef.current.cancelled) setShifts(Array.isArray(json) ? json : []);
 
-      // Fetch wages for this user
       const wagesRes = await getUserWages(currentUser.id);
       if (!wagesRes.success) {
-        // Do not throw; keep shifts usable even if wages fail
         console.warn("getUserWages error:", wagesRes.error);
         if (!abortRef.current.cancelled) setWages([]);
       } else if (!abortRef.current.cancelled) {
@@ -72,8 +69,7 @@ export function ShiftsProvider({ children }) {
     return map;
   }, [wages]);
 
-  // Enhanced, memoized transforms to avoid repetition in components
-  const { shiftsEnhanced, byDay, heatmapValues, earningsByDay, chartData } = useMemo(() => {
+  const { shiftsEnhanced, byDay, heatmapValues, earningsByDay, chartData, spreadsheetData } = useMemo(() => {
     // helpers
     const pad2 = (n) => (n < 10 ? `0${n}` : `${n}`);
     const toDayKey = (d) => {
@@ -85,11 +81,9 @@ export function ShiftsProvider({ children }) {
       return Number.isNaN(d.getTime()) ? null : d;
     };
 
-    // index wages by lowercased title for robust matching
     const wagesLower = new Map();
     wagesMap.forEach((val, key) => wagesLower.set(String(key).toLowerCase().trim(), val));
 
-    // per-shift enhancement
     const enhanced = [];
     const hoursByDay = new Map();
     const earningsByDayLocal = new Map();
@@ -142,12 +136,23 @@ export function ShiftsProvider({ children }) {
         };
       });
 
+    const spreadsheetData = enhanced.map(s => ({
+      date: s.dayKey || "",
+      clockIn: s.clock_in || "",
+      clockOut: s.clock_out || "",
+      earnings: s.earned || 0,
+      breakStart: s.lunch_in || "",
+      breakEnd: s.lunch_out || "",
+      notes: s.notes || "",
+    }));
+
     return {
       shiftsEnhanced: enhanced,
       byDay: hoursByDay,
       heatmapValues: heatmapVals,
       earningsByDay: earningsByDayLocal,
       chartData: chart,
+      spreadsheetData,
     };
   }, [shifts, wagesMap]);
 
@@ -162,6 +167,7 @@ export function ShiftsProvider({ children }) {
       heatmapValues,
       earningsByDay,
       chartData,
+      spreadsheetData,
       loading,
       error,
       refresh,
@@ -176,6 +182,7 @@ export function ShiftsProvider({ children }) {
       heatmapValues,
       earningsByDay,
       chartData,
+      spreadsheetData,
       loading,
       error,
       refresh,

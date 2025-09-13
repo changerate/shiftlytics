@@ -206,7 +206,8 @@ export default function Dashboard() {
                    <Heatmap />
                    
                 </div>
-                <div>
+                <div className="bg-white p-12 rounded-lg shadow-sm border border-accent mt-8">
+                <h2 className="flex items-center justify-center text-xl font-semibold text-gray-900 mb-4">Spreadsheet View</h2>
                     <Spreadsheet />
                 </div>
                 

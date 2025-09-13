@@ -19,26 +19,24 @@ export default function Spreadsheet() {
   if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
   return (
-    <div className="relative overflow-x-auto rounded-xl bg-[#f5f5f5] shadow-inner shadow-lg border border-gray-200">
-      <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead className="text-xs text-gray-700 uppercase bg-[#eeeeee] dark:bg-gray-700 dark:text-gray-400">
+    <div className="relative flex flex-col w-full h-full overflow-scroll text-gray-700 bg-white shadow-md rounded-xl bg-clip-border">
+      <table className="w-full text-left table-auto min-w-max">
+        <thead>
           <tr>
-            {columns.map((col, idx) => (
-              <th
-                key={col.key}
-                scope="col"
-                className={`px-6 py-3 ${idx === 0 ? "rounded-s-lg" : ""} ${idx === columns.length - 1 ? "rounded-e-lg" : ""}`}
-              >
-                {col.label}
+            {columns.map(col => (
+              <th key={col.key} className="p-4 border-b border-blue-gray-100 bg-blue-gray-50">
+                <p className="block font-sans text-sm antialiased font-normal leading-none text-blue-gray-900 opacity-70">
+                  {col.label}
+                </p>
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {spreadsheetData.map((row, idx) => (
-            <tr key={row.date + idx} className="bg-white dark:bg-gray-800">
-              {columns.map((col, colIdx) => (
-                <td key={col.key} className="px-6 py-4">
+            <tr key={row.date + idx}>
+              {columns.map(col => (
+                <td key={col.key}>
                   {col.format ? col.format(row[col.key]) : row[col.key]}
                 </td>
               ))}
@@ -46,13 +44,8 @@ export default function Spreadsheet() {
           ))}
         </tbody>
       </table>
-      <div className="flex items-center justify-center space-x-4 py-4">
-        <Button 
-            variant="primary"
-        >
-            View More
-        </Button>
-      </div>
+      <Button />
+      
     </div>
   );
 }
