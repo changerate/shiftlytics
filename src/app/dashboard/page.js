@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { supabase } from '../../lib/supabaseClient';
 import ProfileCompletionPrompt from '../../components/ProfileCompletionPrompt';
 import ProfilePanel from '../../components/ProfilePanel';
+import Spreadsheet from '../../components/Spreadsheet';
 import { getUserWages } from '../../utils/wageUtils';
 import { getUserProfile } from '../../utils/profileUtils';
 import Test from '../../components/test';
@@ -205,10 +206,14 @@ export default function Dashboard() {
                    <Heatmap />
                    
                 </div>
+                <div>
+                    <Spreadsheet />
+                </div>
                 
 
             </main>
             </ShiftsProvider>
+            
             
         </div>
     );

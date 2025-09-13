@@ -72,9 +72,114 @@ export function ShiftsProvider({ children }) {
     return map;
   }, [wages]);
 
+  // Enhanced, memoized transforms to avoid repetition in components
+  const { shiftsEnhanced, byDay, heatmapValues, earningsByDay, chartData } = useMemo(() => {
+    // helpers
+    const pad2 = (n) => (n < 10 ? `0${n}` : `${n}`);
+    const toDayKey = (d) => {
+      if (!(d instanceof Date)) return null;
+      return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    };
+    const safeDate = (v) => {
+      const d = new Date(v);
+      return Number.isNaN(d.getTime()) ? null : d;
+    };
+
+    // index wages by lowercased title for robust matching
+    const wagesLower = new Map();
+    wagesMap.forEach((val, key) => wagesLower.set(String(key).toLowerCase().trim(), val));
+
+    // per-shift enhancement
+    const enhanced = [];
+    const hoursByDay = new Map();
+    const earningsByDayLocal = new Map();
+
+    for (const s of Array.isArray(shifts) ? shifts : []) {
+      const start = safeDate(s.clock_in);
+      const end = safeDate(s.clock_out);
+      const li = safeDate(s.lunch_in);
+      const lo = safeDate(s.lunch_out);
+      let ms = 0;
+      if (start && end) {
+        ms = Math.max(0, end - start);
+        if (li && lo) ms -= Math.max(0, lo - li);
+      }
+      const hoursWorked = ms / (1000 * 60 * 60);
+      const dayKey = start ? toDayKey(start) : null;
+      const createdDay = s.created_at ? toDayKey(safeDate(s.created_at)) : null;
+
+      // wage/earnings
+      const posKey = String(s.position_title || '').toLowerCase().trim();
+      const wage = wagesLower.get(posKey);
+      const rate = Number(wage?.amount) || 0;
+      const occ = String(wage?.occurrence || 'hourly').toLowerCase();
+      let earned = 0;
+      if (occ === 'hourly') earned = hoursWorked * rate;
+      else if (occ === 'per_shift' || occ === 'flat' || occ === 'shift') earned = rate;
+      else if (occ === 'per_day' || occ === 'daily') earned = rate;
+      else earned = hoursWorked * rate;
+
+      enhanced.push({ ...s, hoursWorked, dayKey, createdDay, earned });
+
+      if (dayKey) {
+        hoursByDay.set(dayKey, (hoursByDay.get(dayKey) || 0) + hoursWorked);
+        earningsByDayLocal.set(dayKey, (earningsByDayLocal.get(dayKey) || 0) + earned);
+      }
+    }
+
+    const heatmapVals = Array.from(hoursByDay.entries()).map(([date, hours]) => ({ date, count: Number(hours.toFixed(2)) }));
+
+    const chart = Array.from(earningsByDayLocal.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, earnings]) => {
+        const hours = hoursByDay.get(date) || 0;
+        const [y, m, d] = date.split('-');
+        return {
+          key: date,
+          date: `${Number(m)}/${Number(d)}`,
+          earnings,
+          hours,
+        };
+      });
+
+    return {
+      shiftsEnhanced: enhanced,
+      byDay: hoursByDay,
+      heatmapValues: heatmapVals,
+      earningsByDay: earningsByDayLocal,
+      chartData: chart,
+    };
+  }, [shifts, wagesMap]);
+
   const value = useMemo(
-    () => ({ user, shifts, wages, wagesMap, loading, error, refresh }),
-    [user, shifts, wages, wagesMap, loading, error, refresh]
+    () => ({
+      user,
+      shifts,
+      shiftsEnhanced,
+      wages,
+      wagesMap,
+      byDay,
+      heatmapValues,
+      earningsByDay,
+      chartData,
+      loading,
+      error,
+      refresh,
+    }),
+    [
+      user,
+      shifts,
+      shiftsEnhanced,
+      wages,
+      wagesMap,
+      byDay,
+      heatmapValues,
+      earningsByDay,
+      chartData,
+      loading,
+      error,
+      refresh,
+    ]
   );
 
   return <ShiftsContext.Provider value={value}>{children}</ShiftsContext.Provider>;
@@ -85,4 +190,3 @@ export function useShifts() {
   if (!ctx) throw new Error("useShifts must be used within a ShiftsProvider");
   return ctx;
 }
-
