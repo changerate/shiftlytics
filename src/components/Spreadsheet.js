@@ -19,6 +19,7 @@ export default function Spreadsheet() {
   if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
   return (
+    <>
     <div className="relative overflow-x-auto rounded-xl bg-[#f5f5f5] shadow-inner shadow-lg border border-gray-200">
       <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 uppercase bg-[#eeeeee] dark:bg-gray-700 dark:text-gray-400">
@@ -46,13 +47,14 @@ export default function Spreadsheet() {
           ))}
         </tbody>
       </table>
-      <div className="flex items-center justify-center space-x-4 py-4">
+    </div>
+    <div className="flex items-center justify-center space-x-4 py-4">
         <Button 
             variant="primary"
         >
             View More
         </Button>
-      </div>
     </div>
+    </>
   );
 }
