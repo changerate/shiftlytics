@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useShifts } from "../context/ShiftsContext";
 
 export default function RecentShifts() {
-  const { user, shiftsEnhanced = [], loading, error, refresh } = useShifts();
+  const { user, shiftsEnhanced = [], loading, error } = useShifts();
 
   const recent = useMemo(() => {
     return [...(shiftsEnhanced || [])]
@@ -61,18 +61,9 @@ export default function RecentShifts() {
 
   return (
     <section className="p-4">
-      <header className="mb-3 flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Recent Shifts</h3>
-          <p className="text-sm text-gray-500">{user?.email || "—"}</p>
-        </div>
-        <button
-          onClick={refresh}
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium shadow-sm hover:bg-gray-50 active:scale-[0.98]"
-          aria-label="Refresh recent shifts"
-        >
-          Refresh
-        </button>
+      <header className="mb-3">
+        <h3 className="text-lg font-semibold">Recent Shifts</h3>
+        <p className="text-sm text-gray-500">{user?.email || "—"}</p>
       </header>
 
       {recent.length === 0 ? (

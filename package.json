@@ -12,6 +12,8 @@
     "@headlessui/react": "^2.2.8",
     "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.53.0",
+    "jspdf": "^3.0.2",
+    "jspdf-autotable": "^5.0.2",
     "next": "15.4.5",
     "react": "19.1.0",
     "react-calendar-heatmap": "^1.10.0",

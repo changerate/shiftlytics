@@ -1,10 +1,13 @@
 "use client";
+import { useState, useRef } from "react";
 import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
 import { useShifts } from "../context/ShiftsContext";
 
 export default function Heatmap() {
   const { heatmapValues, loading, error } = useShifts();
+  const containerRef = useRef(null);
+  const [tip, setTip] = useState({ show: false, x: 0, y: 0, date: '', hours: 0 });
 
   const now = new Date();
   const year = now.getFullYear();
@@ -20,23 +23,54 @@ export default function Heatmap() {
     return `color-gitlab-${bucket}`;
   };
 
-  const titleForValue = (value) => {
-    if (!value || !value.date) return "";
-    const hours = Number(value.count || 0).toFixed(2);
-    return `${value.date}: ${hours}h`;
-  };
+  const titleForValue = () => ""; // disable native title tooltip
 
   if (loading) return <div>Loading heatmap…</div>;
   if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
 
+  const handleEnter = (e, value) => {
+    if (!value) return;
+    const rect = containerRef.current?.getBoundingClientRect();
+    const hours = Number(value.count || 0).toFixed(2);
+    setTip({
+      show: true,
+      x: (e.clientX - (rect?.left || 0)) + 10,
+      y: (e.clientY - (rect?.top || 0)) + 10,
+      date: value.date,
+      hours,
+    });
+  };
+
+  const handleLeave = () => setTip((t) => ({ ...t, show: false }));
+
   return (
-    <CalendarHeatmap
-      startDate={startDate}
-      endDate={endDate}
-      values={heatmapValues || []}
-      classForValue={classForValue}
-      titleForValue={titleForValue}
-      showWeekdayLabels
-    />
+    <div ref={containerRef} className="relative">
+      <CalendarHeatmap
+        startDate={startDate}
+        endDate={endDate}
+        values={heatmapValues || []}
+        classForValue={classForValue}
+        titleForValue={titleForValue}
+        showWeekdayLabels
+        transformDayElement={(element, value) => (
+          <g
+            onMouseEnter={(e) => handleEnter(e, value)}
+            onMouseMove={(e) => handleEnter(e, value)}
+            onMouseLeave={handleLeave}
+          >
+            {element}
+          </g>
+        )}
+      />
+      {tip.show && (
+        <div
+          className="pointer-events-none absolute z-10 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm shadow-md dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+          style={{ left: tip.x, top: tip.y }}
+        >
+          <div className="font-medium text-gray-900 dark:text-gray-100">{tip.date}</div>
+          <div className="text-gray-700 dark:text-gray-300">Hours: {tip.hours}</div>
+        </div>
+      )}
+    </div>
   );
 }

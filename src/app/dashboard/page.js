@@ -166,7 +166,6 @@ export default function Dashboard() {
                 </div>
 
                 {/* Content Grid */}
-                <p className='text-primary text-sm w-full mx-auto'>Maybe this content grid could be useful!?</p>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     {/* Recent Shifts */}
                     <div className="bg-white p-6 rounded-lg shadow-sm border border-accent">
@@ -206,9 +205,9 @@ export default function Dashboard() {
                    <Heatmap />
                    
                 </div>
-                <div className="bg-white p-12 rounded-lg shadow-sm border border-accent mt-8">
-                <h2 className="flex items-center justify-center text-xl font-semibold text-gray-900 mb-4">Spreadsheet View</h2>
-                    <Spreadsheet />
+                <div className="bg-white p-8 rounded-lg shadow-sm border border-accent mt-8">
+                <div className="mb-2 text-sm font-medium tracking-wide text-gray-500 uppercase text-center">Spreadsheet View</div>
+                  <Spreadsheet />
                 </div>
                 
 

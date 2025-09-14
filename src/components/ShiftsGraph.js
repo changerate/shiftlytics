@@ -46,7 +46,7 @@ const humanizeRange = (dr) => {
 };
 
 export default function ShiftsGraph({ dateRange }) {
-  const { chartData, earningsByDay, byDay, loading, error } = useShifts();
+  const { chartData, earningsByDay, byDay, shiftsEnhanced = [], loading, error } = useShifts();
 
   // filter/pad using context maps only—no recomputation of earnings/hours.
   const paddedChartData = useMemo(() => {
@@ -75,15 +75,34 @@ export default function ShiftsGraph({ dateRange }) {
 
   const rangeText = humanizeRange(dateRange);
 
+  // Build roles by dayKey for tooltip enrichment
+  const rolesByDay = useMemo(() => {
+    const map = new Map();
+    for (const s of shiftsEnhanced || []) {
+      const key = s.dayKey;
+      if (!key) continue;
+      const title = (s.position_title || '').toString().trim();
+      if (!title) continue;
+      if (!map.has(key)) map.set(key, new Set());
+      map.get(key).add(title);
+    }
+    return map;
+  }, [shiftsEnhanced]);
+
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload || !payload.length) return null;
     const p = payload[0]?.payload || {};
+    const roleSet = rolesByDay.get(p.key);
+    const roles = roleSet ? Array.from(roleSet) : [];
     return (
-      <div className="rounded-md border border-border-light bg-surface p-3 shadow-sm">
-        <div className="text-sm font-semibold text-text-primary">{label}</div>
-        <div className="mt-2 text-sm">
+      <div className="rounded-md border border-border-light bg-white p-3 shadow-lg dark:bg-gray-800">
+        <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">{label}</div>
+        <div className="mt-2 text-sm text-gray-700 dark:text-gray-300 space-y-1">
           <div>Earnings: ${Number(p.earnings).toFixed(2)}</div>
           <div>Hours: {Number(p.hours).toFixed(2)}</div>
+          {roles.length > 0 && (
+            <div>Roles: {roles.join(', ')}</div>
+          )}
         </div>
       </div>
     );
