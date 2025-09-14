@@ -1,5 +1,5 @@
 "use client";
-import Button from '../../../components/Button.js';
+import Button from '../../../ui/Button.js';
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import TimeInput from "../../../components/TimeInput";

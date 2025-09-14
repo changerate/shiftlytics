@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
-import { useShifts } from "../context/ShiftsContext";
+import { useShifts } from "../../../context/ShiftsContext";
 
 export default function Heatmap() {
   const { heatmapValues, loading, error } = useShifts();
@@ -12,7 +12,6 @@ export default function Heatmap() {
   const now = new Date();
   const year = now.getFullYear();
 
-  // From (last year)-12-31 to (this year)-12-31
   const startDate = `${year - 1}-12-31`;
   const endDate = `${year}-12-31`;
 
@@ -23,7 +22,7 @@ export default function Heatmap() {
     return `color-gitlab-${bucket}`;
   };
 
-  const titleForValue = () => ""; // disable native title tooltip
+  const titleForValue = () => "";
 
   if (loading) return <div>Loading heatmap…</div>;
   if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
@@ -74,3 +73,4 @@ export default function Heatmap() {
     </div>
   );
 }
+

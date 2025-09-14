@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 
-import Button from '../../../components/Button.js';
+import Button from '../../../ui/Button.js';
 
 export default function SignUp() {
   const [firstName, setFirstName] = useState("");

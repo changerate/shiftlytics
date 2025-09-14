@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import Button from "./Button";
+import Button from "../../../ui/Button";
 
 const TIME_PRESETS = [
   { key: "last7days", label: "7D", days: 7 },
@@ -39,7 +39,6 @@ export default function TimeDataView({
     if (onTimeRangeChange) onTimeRangeChange(dateRange);
   };
 
-  // Fire initial selection on mount so children have a range immediately
   useEffect(() => {
     const initial = TIME_PRESETS.find((p) => p.key === defaultTimeRange) || TIME_PRESETS[0];
     handleTimeRangeChange(initial);
@@ -48,12 +47,10 @@ export default function TimeDataView({
 
   return (
     <div className={`bg-surface rounded-lg shadow-sm border border-border-light ${className}`}>
-      {/* Header */}
       <div className="p-6 border-b border-accent">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h2 className="text-xl font-semibold text-text-primary">{title}</h2>
 
-          {/* Time Range Selector */}
           <div className="flex flex-wrap gap-2">
             {TIME_PRESETS.map((preset) => (
               <Button
@@ -70,14 +67,13 @@ export default function TimeDataView({
         </div>
       </div>
 
-      {/* Content */}
       <div className="p-2">
         {children ? (
           children
         ) : (
           <div className="flex items-center justify-center h-64 bg-surface-hover rounded-lg border border-border-light">
             <div className="text-center">
-              <div className="text-4xl text-text-muted mb-3">📊</div>
+              <div className="text-4xl text-text-muted mb-3">dY"S</div>
               <p className="text-text-secondary">Graph components will be displayed here</p>
               <p className="text-sm text-text-muted mt-1">
                 Currently showing data for:{" "}
@@ -90,3 +86,4 @@ export default function TimeDataView({
     </div>
   );
 }
+

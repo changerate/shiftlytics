@@ -1,6 +1,6 @@
 "use client";
 import { useMemo } from "react";
-import { useShifts } from "../context/ShiftsContext";
+import { useShifts } from "../../../context/ShiftsContext";
 
 export default function RecentShifts() {
   const { user, shiftsEnhanced = [], loading, error } = useShifts();
@@ -27,7 +27,6 @@ export default function RecentShifts() {
     new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })
       .format(Number(n || 0));
 
-  // hours -> subtle left-border color
   const hourTone = (h) =>
     h >= 8 ? "border-emerald-500/70"
       : h >= 6 ? "border-emerald-400/70"
@@ -68,7 +67,7 @@ export default function RecentShifts() {
 
       {recent.length === 0 ? (
         <div className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm">
-          <div className="mx-auto mb-2 h-10 w-10 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center">📭</div>
+          <div className="mx-auto mb-2 h-10 w-10 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center">dY"-</div>
           <p className="text-sm text-gray-600">No shifts yet. Add one to see it here.</p>
           <a href="/addShift" className="mt-3 inline-block rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50">
             Add a Shift
@@ -76,11 +75,9 @@ export default function RecentShifts() {
         </div>
       ) : (
         <ol className="relative ml-4 grid gap-3">
-          {/* vertical line */}
           <span className="absolute left-[-1px] top-0 h-full w-[2px] bg-gray-200" aria-hidden />
-          {recent.map((s, idx) => (
+          {recent.map((s) => (
             <li key={s.id || s.clock_in} className="relative">
-              {/* dot */}
               <span
                 className="absolute -left-[9px] top-5 h-3 w-3 rounded-full bg-gray-300 ring-4 ring-white"
                 aria-hidden
@@ -91,15 +88,13 @@ export default function RecentShifts() {
                   Number(s.hoursWorked || 0)
                 )} border-l-4 border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md`}
               >
-                {/* top row */}
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="font-medium">{fmtDate(s.clock_in)}</div>
                   <div className="text-sm text-gray-500">
-                    {fmtTime(s.clock_in)} <span className="mx-1">—</span> {fmtTime(s.clock_out)}
+                    {fmtTime(s.clock_in)} <span className="mx-1">–</span> {fmtTime(s.clock_out)}
                   </div>
                 </div>
 
-                {/* chips */}
                 <div className="mt-3 flex flex-wrap gap-2">
                   <span className="inline-flex items-center rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium">
                     {s.position_title || "—"}
@@ -114,7 +109,6 @@ export default function RecentShifts() {
                   )}
                 </div>
 
-                {/* notes */}
                 <div className="mt-3 border-t border-dashed border-gray-200 pt-3">
                   <div className="text-[11px] uppercase tracking-wide text-gray-500 mb-1">Notes</div>
                   <p className="text-sm text-gray-800 line-clamp-3">
@@ -129,3 +123,4 @@ export default function RecentShifts() {
     </section>
   );
 }
+

@@ -1,11 +1,9 @@
 "use client";
 import { useState } from "react";
-import { useShifts } from "../context/ShiftsContext";
-import Button from "./Button";
-import BasicMenu from "./BasicMenu";
+import { useShifts } from "../../../context/ShiftsContext";
+import BasicMenu from "../../../ui/BasicMenu";
 import { DocumentArrowDownIcon, ArrowDownTrayIcon } from '@heroicons/react/20/solid'
 
-// Helper to format ISO time to "h:mm AM/PM"
 function formatClockTime(iso) {
   if (!iso) return "";
   const d = new Date(iso);
@@ -59,7 +57,7 @@ async function exportToPDF(data, columns, filename = `spreadsheet-${new Date().t
 export default function Spreadsheet() {
   const { spreadsheetData = [], loading, error } = useShifts();
   const [expanded, setExpanded] = useState(false);
-  const [exporting, setExporting] = useState(null); // 'csv' | 'pdf' | null
+  const [exporting, setExporting] = useState(null);
 
   if (loading) return <div>Loading…</div>;
   if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
@@ -71,12 +69,7 @@ export default function Spreadsheet() {
       disabled: loading || spreadsheetData.length === 0 || !!exporting,
       icon: <ArrowDownTrayIcon className="size-4" aria-hidden />,
       onClick: async () => {
-        try {
-          setExporting('csv');
-          exportToCSV(spreadsheetData, columns);
-        } finally {
-          setExporting(null);
-        }
+        try { setExporting('csv'); exportToCSV(spreadsheetData, columns); } finally { setExporting(null); }
       },
     },
     {
@@ -85,17 +78,11 @@ export default function Spreadsheet() {
       disabled: loading || spreadsheetData.length === 0 || !!exporting,
       icon: <DocumentArrowDownIcon className="size-4" aria-hidden />,
       onClick: async () => {
-        try {
-          setExporting('pdf');
-          await exportToPDF(spreadsheetData, columns);
-        } finally {
-          setExporting(null);
-        }
+        try { setExporting('pdf'); await exportToPDF(spreadsheetData, columns); } finally { setExporting(null); }
       },
     },
   ];
 
-  // Show all rows if expanded, otherwise just first 3
   const visibleRows = expanded ? spreadsheetData : spreadsheetData.slice(0, 3);
 
   return (
@@ -103,15 +90,12 @@ export default function Spreadsheet() {
       <div className="mb-5 flex justify-end">
         <BasicMenu name="Export" options={menuOptions} />
       </div>
-
-      {/* Sunken/neumorphic container */}
       <div
         className="relative rounded-2xl border border-neutral-300/80 dark:border-gray-700 
         bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-gray-800 dark:to-gray-900 
         shadow-[inset_8px_8px_16px_rgba(0,0,0,0.12),_inset_-8px_-8px_16px_rgba(255,255,255,0.7)] 
         dark:shadow-[inset_8px_8px_16px_rgba(0,0,0,0.55),_inset_-8px_-8px_16px_rgba(255,255,255,0.05)]"
       >
-        {/* Spreadsheet Table with animation */}
         <div
           className={`transition-all duration-500 ease-in-out ${
             expanded ? "max-h-[1000px]" : "max-h-[260px]"
@@ -145,14 +129,12 @@ export default function Spreadsheet() {
           </table>
         </div>
 
-        {/* Subtle bottom fade when collapsed and more rows exist */}
         {!expanded && (spreadsheetData.length - 3) > 0 && (
           <div className="pointer-events-none absolute inset-x-0 bottom-12 h-12 
             bg-gradient-to-t from-neutral-200/90 via-neutral-200/40 to-transparent 
             dark:from-gray-900/90 dark:via-gray-900/40" />
         )}
 
-        {/* Expand/Collapse Button */}
         {spreadsheetData.length > 3 && (
           <div className="flex justify-center items-center px-4 py-3 border-t border-neutral-300/70 dark:border-gray-700">
             <button
@@ -176,3 +158,4 @@ export default function Spreadsheet() {
     </>
   );
 }
+

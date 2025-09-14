@@ -10,7 +10,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import { useShifts } from "../context/ShiftsContext";
+import { useShifts } from "../../../context/ShiftsContext";
 
 const pad2 = (n) => (n < 10 ? `0${n}` : `${n}`);
 const toDateOnly = (v) => {
@@ -48,14 +48,12 @@ const humanizeRange = (dr) => {
 export default function ShiftsGraph({ dateRange }) {
   const { chartData, earningsByDay, byDay, shiftsEnhanced = [], loading, error } = useShifts();
 
-  // filter/pad using context maps only—no recomputation of earnings/hours.
   const paddedChartData = useMemo(() => {
     const startD = toDateOnly(dateRange?.startDate);
     const endD = toDateOnly(dateRange?.endDate);
 
     if (!startD || !endD) return Array.isArray(chartData) ? chartData : [];
 
-    // build zero-padded rows across the range.
     return enumerateDays(startD, endD).map((key) => {
       const earnings = Number(earningsByDay.get(key) || 0);
       const hours = Number(byDay.get(key) || 0);
@@ -75,7 +73,6 @@ export default function ShiftsGraph({ dateRange }) {
 
   const rangeText = humanizeRange(dateRange);
 
-  // Build roles by dayKey for tooltip enrichment
   const rolesByDay = useMemo(() => {
     const map = new Map();
     for (const s of shiftsEnhanced || []) {
@@ -117,7 +114,7 @@ export default function ShiftsGraph({ dateRange }) {
         <div className="h-full w-full flex items-center justify-center">
           <div className="max-w-md w-full text-center bg-surface border border-border-light rounded-xl p-6 shadow-sm">
             <div className="mx-auto mb-3 h-12 w-12 rounded-2xl bg-surface-hover border border-border-light flex items-center justify-center text-2xl">
-              📭
+              dY"-
             </div>
             <h3 className="text-lg font-semibold text-text-primary">
               No shifts in {rangeText}.
@@ -152,3 +149,4 @@ export default function ShiftsGraph({ dateRange }) {
     </div>
   );
 }
+

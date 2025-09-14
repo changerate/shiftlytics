@@ -76,3 +76,4 @@ export default function BasicMenu({ name = "Menu", options = [] }) {
     </Menu>
   )
 }
+
