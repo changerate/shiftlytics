@@ -1,6 +1,7 @@
 "use client";
 // migrating new dashboard from "the graph" branch
 import Button from '../../components/Button';
+import TopNav from '../../components/TopNav';
 import TimeDataView from '../../components/TimeDataView';
 import GraphDemo from '../../components/GraphDemo';
 import ShiftsGraph from '../../components/ShiftsGraph';
@@ -120,49 +121,20 @@ export default function Dashboard() {
                 userId={currentUser?.id}
             />
         )}
-        {/* Header */}
-            <header className="bg-surface shadow-sm border-b border-border-light">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-6">
-                        <div>
-                            <h1 className="text-3xl font-bold text-text-primary">{`Welcome${greetingName ? `, ${greetingName}` : ''}`}</h1>
-                            <p className="text-text-secondary">Personal Work Schedule Management</p>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                            {/* My Profile */}
-                            <Button 
-                                onClick={() => setShowProfilePanel(true)}
-                                variant="secondary"
-                            >
-                                My Profile
-                            </Button>
-
-                            {/* Add New Shift */}
-                            <Button 
-                                onClick={() => window.location.href = "/addShift"}
-                                variant="primary"
-                            >
-                                Add New Shift
-                            </Button>
-
-                            {/* Logout Button */}
-                            <Button
-                                onClick={handleLogout}
-                                variant='noOutlineBlack'
-                            >
-                                Logout
-                            </Button>
-
-                        </div>
-                    </div>
-                </div>
-            </header>
+            {/* Global Nav */}
+            <TopNav />
 
             {/* Main Content */}
             <ShiftsProvider>
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                </div>
+
+                {/* Greeting */}
+                <div className="mb-6">
+                  <h1 className="text-2xl font-bold text-text-primary">{`Welcome${greetingName ? `, ${greetingName}` : ''}`}</h1>
+                  <p className="text-text-secondary">Personal Work Schedule Management</p>
                 </div>
 
                 {/* Content Grid */}
@@ -172,14 +144,6 @@ export default function Dashboard() {
                         <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Shifts</h2>
                         <div className="space-y-4">
                         <Test />
-                        </div>
-                    </div>
-
-                    {/* Quick Actions */}
-                    <div className="bg-white p-6 rounded-lg shadow-sm border border-accent">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
-                        <div className="space-y-3">
-                        {/* ...existing code... */}
                         </div>
                     </div>
                 </div>
@@ -206,7 +170,7 @@ export default function Dashboard() {
                    
                 </div>
                 <div className="bg-white p-8 rounded-lg shadow-sm border border-accent mt-8">
-                <div className="mb-2 text-sm font-medium tracking-wide text-gray-500 uppercase text-center">Spreadsheet View</div>
+                  <div className="mb-2 text-sm font-medium tracking-wide text-gray-500 uppercase">Spreadsheet</div>
                   <Spreadsheet />
                 </div>
                 

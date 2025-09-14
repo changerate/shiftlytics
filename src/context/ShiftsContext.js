@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { getUserWages } from "../utils/wageUtils";
 
@@ -11,53 +11,40 @@ export function ShiftsProvider({ children }) {
   const [wages, setWages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const abortRef = useRef({ cancelled: false });
-
-  const fetchAll = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const { data: authData, error: authError } = await supabase.auth.getUser();
-      if (authError) throw authError;
-      const currentUser = authData?.user;
-      if (!currentUser) {
-        throw new Error("Not authenticated");
-      }
-      setUser(currentUser);
-
-      const res = await fetch(`/api/data?userId=${encodeURIComponent(currentUser.id)}`, {
-        cache: "no-store",
-      });
-      if (!res.ok) {
-        throw new Error(`API /api/data error: ${res.status}`);
-      }
-      const json = await res.json();
-      if (!abortRef.current.cancelled) setShifts(Array.isArray(json) ? json : []);
-
-      const wagesRes = await getUserWages(currentUser.id);
-      if (!wagesRes.success) {
-        console.warn("getUserWages error:", wagesRes.error);
-        if (!abortRef.current.cancelled) setWages([]);
-      } else if (!abortRef.current.cancelled) {
-        setWages(wagesRes.wages || []);
-      }
-    } catch (e) {
-      if (!abortRef.current.cancelled) setError(e?.message || String(e));
-    } finally {
-      if (!abortRef.current.cancelled) setLoading(false);
-    }
-  }, []);
+  const [reloadTick, setReloadTick] = useState(0);
 
   useEffect(() => {
-    abortRef.current.cancelled = false;
-    fetchAll();
-    return () => {
-      abortRef.current.cancelled = true;
-    };
-  }, [fetchAll]);
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setError("");
+      try {
+        // Auth via Supabase
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError) throw authError;
+        const currentUser = authData?.user;
+        if (!currentUser) throw new Error("Not authenticated");
+        if (!cancelled) setUser(currentUser);
 
-  const refresh = useCallback(() => fetchAll(), [fetchAll]);
+        // Shifts via existing API route
+        const res = await fetch(`/api/data?userId=${encodeURIComponent(currentUser.id)}`, { cache: "no-store" });
+        if (!res.ok) throw new Error(`API /api/data error: ${res.status}`);
+        const json = await res.json();
+        if (!cancelled) setShifts(Array.isArray(json) ? json : []);
+
+        // Wages via existing utility (direct Supabase)
+        const wagesRes = await getUserWages(currentUser.id);
+        if (!cancelled) setWages(wagesRes.success ? (wagesRes.wages || []) : []);
+      } catch (e) {
+        if (!cancelled) setError(e?.message || String(e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [reloadTick]);
+
+  const refresh = useCallback(() => setReloadTick((n) => n + 1), []);
 
   const wagesMap = useMemo(() => {
     const map = new Map();
@@ -100,7 +87,6 @@ export function ShiftsProvider({ children }) {
       }
       const hoursWorked = ms / (1000 * 60 * 60);
       const dayKey = start ? toDayKey(start) : null;
-      const createdDay = s.created_at ? toDayKey(safeDate(s.created_at)) : null;
 
       // wage/earnings
       const posKey = String(s.position_title || '').toLowerCase().trim();
@@ -113,7 +99,7 @@ export function ShiftsProvider({ children }) {
       else if (occ === 'per_day' || occ === 'daily') earned = rate;
       else earned = hoursWorked * rate;
 
-      enhanced.push({ ...s, hoursWorked, dayKey, createdDay, earned });
+      enhanced.push({ ...s, hoursWorked, dayKey, earned });
 
       if (dayKey) {
         hoursByDay.set(dayKey, (hoursByDay.get(dayKey) || 0) + hoursWorked);
