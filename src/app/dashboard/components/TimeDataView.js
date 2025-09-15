@@ -46,7 +46,7 @@ export default function TimeDataView({
   }, []);
 
   return (
-    <div className={`bg-surface rounded-lg shadow-sm border border-border-light ${className}`}>
+    <div className={`app-card ${className}`}>
       <div className="p-6 border-b border-accent">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h2 className="text-xl font-semibold text-text-primary">{title}</h2>

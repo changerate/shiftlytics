@@ -12,11 +12,13 @@ export default function PaycheckAuditPage() {
       {/* Main */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <AuditInstructions />
-        <section className="bg-white rounded-lg shadow-sm border border-accent p-6 mb-8">
+        <section className="app-card p-6 mb-8">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Upload paystub</h2>
           <AuditUploader />
         </section>
-        <MissionStatement />
+        <div className="app-card p-6">
+          <MissionStatement />
+        </div>
       </main>
     </div>
   );
