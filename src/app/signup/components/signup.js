@@ -78,7 +78,7 @@ export default function SignUp() {
               onChange={(e) => setFirstName(e.target.value)}
               className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-offset-2"
               style={{
-                borderColor: "#748cab", // silver_lake_blue
+                borderColor: "#748cab",
               }}
               required
             />
