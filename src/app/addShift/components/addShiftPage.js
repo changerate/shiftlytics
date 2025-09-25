@@ -3,8 +3,8 @@
 import Button from '../../../ui/Button.js';
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import TimeInput from "../../../components/TimeInput";
-import CustomWageSelector from "../../../components/CustomWageSelector";
+import TimeInput from "../../../ui/TimeInput.js";
+import CustomWageSelector from "../../../ui/CustomWageSelector.js";
 import { createShift, validateShiftTimes } from "../../../utils/shiftUtils.js";
 import { supabase } from "../../../lib/supabaseClient";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,7 +27,7 @@ export default function AddShiftPage() {
   const [hint, setHint] = useState("");
   const router = useRouter();
 
-  // prevent side-to-side scroll at the page level
+  // prevent side-to-side
   useEffect(() => {
     const prev = document.body.style.overflowX;
     document.body.style.overflowX = "hidden";
@@ -40,7 +40,6 @@ export default function AddShiftPage() {
     setError("");
   };
 
-  // quick duration helpers (for live preview)
   const parseHM = (t) => {
     // expects "HH:MM"
     if (!t || !/^\d{2}:\d{2}$/.test(t)) return null;
@@ -146,11 +145,9 @@ export default function AddShiftPage() {
           </button>
         </div>
 
-        {/* Main card */}
         <motion.div {...card} className="app-card overflow-hidden">
           {sectionTitle("Shift Details")}
           <form onSubmit={onSubmit} className="p-5 space-y-7">
-            {/* Date & Wage */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label htmlFor="date" className={labelCls}>Date <span className="text-red-500">*</span></label>
@@ -176,7 +173,6 @@ export default function AddShiftPage() {
               </div>
             </div>
 
-            {/* Times */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label htmlFor="startTime" className={labelCls}>Clock In <span className="text-red-500">*</span></label>
@@ -201,7 +197,6 @@ export default function AddShiftPage() {
               </div>
             </div>
 
-            {/* Lunch toggle */}
             <div className="flex items-center justify-between rounded-lg border border-border-light bg-surface px-4 py-3">
               <div>
                 <div className="text-sm font-medium text-slate-900">Add a Lunch Break</div>
@@ -229,7 +224,6 @@ export default function AddShiftPage() {
               </label>
             </div>
 
-            {/* Lunch times (animated mount) */}
             <AnimatePresence initial={false}>
               {shiftData.addLunch && (
                 <motion.div
@@ -277,7 +271,6 @@ export default function AddShiftPage() {
               />
             </div>
 
-            {/* Live summary */}
             <div className="rounded-lg border border-border-light bg-surface p-4">
               <div className="flex items-start gap-2">
                 {hint ? (
@@ -302,7 +295,6 @@ export default function AddShiftPage() {
               </div>
             </div>
 
-            {/* Errors */}
             <AnimatePresence>
               {error && (
                 <motion.div
@@ -332,7 +324,6 @@ export default function AddShiftPage() {
   );
 }
 
-/* ---------- helpers ---------- */
 function fmtMins(mins) {
   if (mins == null) return "";
   const h = Math.floor(mins / 60);

@@ -1,49 +1,54 @@
 @import "tailwindcss";
 
-/* =========================================
-   Base palette + softened canvas
-========================================= */
 :root {
-  /* Softer canvas vs prior saturated green */
   --background: #F5F7F2;
-  --foreground: #171717;
+  --foreground: #0f172a;
+
+  --brand: #789342;
+  --brand-hover: #8daa57;
+  --teal: #548D95;
+
+  --surface: #FFFFFF;
+  --surface-alt: #f7f9f4;
+
+  --text: #0f172a;
+  --text-muted: #475569;
+
+  --border: rgba(16,24,40,.08);
+  --shadow: 0 12px 28px rgba(16,24,40,.08);
 }
 
-/* Tailwind theme tokens (kept your palette, tweaked usage) */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Primary green */
   --color-primary-50: #eef4e4;
   --color-primary-100:#dce7c8;
   --color-primary-200:#c7d8a7;
   --color-primary-300:#afc98a;
   --color-primary-400:#9ab96f;
   --color-primary-500:#8daa57;
-  --color-primary-600:#789342;   /* base */
+  --color-primary-600:#789342;   
   --color-primary-700:#5f7636;
   --color-primary-800:#4c5c2c;
   --color-primary-900:#3d4822;
   --color-primary: var(--color-primary-600);
   --color-primary-hover: var(--color-primary-500);
 
-  /* Secondary teal */
   --color-secondary-50:#eaf2f3;
   --color-secondary-100:#d5e5e8;
   --color-secondary-200:#b6cfd3;
   --color-secondary-300:#95b6bb;
   --color-secondary-400:#6fa0a6;
-  --color-secondary-500:#548D95; /* base */
+  --color-secondary-500:#548D95;
   --color-secondary-600:#45747b;
   --color-secondary-700:#395f64;
   --color-secondary-800:#2e4c50;
   --color-secondary-900:#253e42;
   --color-secondary: var(--color-secondary-500);
 
-  /* Grays */
   --color-neutral-50:#fafafa;
   --color-neutral-100:#f4f4f5;
   --color-neutral-200:#e4e4e7;
@@ -55,103 +60,93 @@
   --color-neutral-800:#27272a;
   --color-neutral-900:#18181b;
 
-  /* Info (aqua) */
   --color-info-400:#82ced1;
   --color-info-500:#76C1C3;
   --color-info-600:#66a9ab;
 
-  /* Surfaces & text */
-  --color-surface:#FFFFFF;
+  --color-surface: var(--surface);
   --color-surface-hover: var(--color-neutral-50);
   --color-surface-pressed: var(--color-neutral-100);
 
-  --color-text-primary: var(--color-neutral-900);
-  --color-text-secondary: var(--color-neutral-700);
+  --color-text-primary: var(--text);
+  --color-text-secondary: var(--text-muted);
   --color-text-muted: var(--color-neutral-500);
   --color-text-on-primary:#FFFFFF;
   --color-text-on-secondary:#FFFFFF;
 
-  /* Borders */
-  --color-border-light: rgba(16,24,40,.08);
+  --color-border-light: var(--border);
 }
 
-/* Dark mode fall-back (keep simple) */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --surface: #0c0c0c;
+    --surface-alt:#0e100e;
+    --text:#e5e7eb;
+    --text-muted:#9aa3af;
+    --border: rgba(255,255,255,.08);
+    --shadow: 0 12px 28px rgba(0,0,0,.35);
+    --brand:#8daa57;
+    --brand-hover:#a4c16a;
   }
 }
 
-/* =========================================
-   Canvas background with subtle radial tint
-========================================= */
+html, body { height: 100%; }
+html { overflow-y: auto; }
 body {
   background:
     radial-gradient(1200px 600px at 70% -10%, rgba(84,141,149,.08), transparent 60%),
     radial-gradient(900px 500px at -10% 20%, rgba(120,147,66,.06), transparent 55%),
     var(--background);
-  color: var(--foreground);
+  color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  overflow: visible; 
 }
 
-/* =========================================
-   Card shell used across sections
-========================================= */
+[class*="overflow-y-auto"], [class*="overflow-auto"], [class*="overflow-scroll"] {
+  overflow: visible !important;
+}
+:where(main, .app-card, .section, .content, .container) {
+  max-height: none !important;
+}
+
+.no-inner-scroll { overflow: visible !important; max-height: none !important; }
+
 .app-card {
-  background: var(--color-surface);
+  background: var(--surface);
   border-radius: 14px;
   box-shadow: 0 6px 24px rgba(16,24,40,.06);
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--border);
 }
+.section-header{ display:flex; align-items:center; gap:.75rem; padding:.875rem 1rem; border-bottom:1px solid var(--border); color: var(--text); font-weight:600; }
+.section-dot{ width:.5rem; height:.5rem; border-radius:9999px; background: var(--teal); }
 
-/* Section header bar for consistent hierarchy */
-.section-header{
-  display:flex; align-items:center; gap:.75rem;
-  padding:.875rem 1rem;
-  border-bottom:1px solid var(--color-border-light);
-  color:#0f172a; font-weight:600;
-}
-.section-dot{ width:.5rem; height:.5rem; border-radius:9999px; background: var(--color-secondary); }
+.btn { display:inline-flex; align-items:center; gap:.5rem; padding:.55rem .95rem; border-radius:9999px; font-size:.875rem; transition:all .15s ease; border:1px solid transparent; }
+.btn:active { transform: translateY(0.5px) scale(.99); }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--brand); }
+.btn-primary { background: var(--brand); color:#fff; }
+.btn-primary:hover { background: var(--brand-hover); }
+.btn-outline { background:#fff; border-color: var(--border); color: var(--text); }
+.btn-outline:hover { background: var(--color-surface-hover); }
 
-/* =========================================
-   Recharts tone alignment
-========================================= */
+
+.input { width:100%; border:1px solid var(--border); background:#fff; color:var(--text); padding:.6rem .75rem; border-radius:10px; font-size:.9rem; }
+.input:focus { outline:none; box-shadow:0 0 0 3px rgba(120,147,66,.18); border-color: var(--brand); }
+
+
 .recharts-cartesian-grid-horizontal line,
-.recharts-cartesian-grid-vertical line {
-  stroke: rgba(0,0,0,0.08);
-}
+.recharts-cartesian-grid-vertical line { stroke: rgba(0,0,0,0.08); }
 .recharts-text { fill: rgba(0,0,0,0.62) !important; }
 
-/* =========================================
-   Calendar heatmap palette
-========================================= */
 .react-calendar-heatmap .color-empty rect { fill: rgba(0,0,0,0.06); }
 .react-calendar-heatmap .color-gitlab-1 rect { fill: #b2e3e4; }
 .react-calendar-heatmap .color-gitlab-2 rect { fill: #95d6d8; }
 .react-calendar-heatmap .color-gitlab-3 rect { fill: #82ced1; }
 .react-calendar-heatmap .color-gitlab-4 rect { fill: #548D95; }
 
-/* =========================================
-   Table polish (Spreadsheet)
-========================================= */
-.table{
-  width:100%;
-  border-collapse:separate;
-  border-spacing:0 6px; /* row “cards” */
-}
-.table thead th{
-  font-size:.75rem;
-  text-transform:uppercase;
-  letter-spacing:.04em;
-  color:#475569;
-  font-weight:600;
-  padding:.5rem .75rem;
-}
-.table tbody tr{
-  background:#fff;
-  border:1px solid var(--color-border-light);
-  box-shadow:0 1px 2px rgba(16,24,40,.03);
-}
-.table td{ padding:.65rem .75rem; color:#0f172a; }
+.table{ width:100%; border-collapse:separate; border-spacing:0 6px; }
+.table thead th{ font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:#475569; font-weight:600; padding:.5rem .75rem; }
+.table tbody tr{ background:#fff; border:1px solid var(--border); box-shadow:0 1px 2px rgba(16,24,40,.03); }
+.table td{ padding:.65rem .75rem; color:var(--text); }
 .table td.num{ text-align:right; font-variant-numeric: tabular-nums; }

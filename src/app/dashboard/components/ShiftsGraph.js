@@ -1,126 +1,160 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import {
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area,
 } from "recharts";
 import { useShifts } from "../../../context/ShiftsContext";
 
-const pad2 = (n) => (n < 10 ? `0${n}` : `${n}`);
-const toDateOnly = (v) => {
-  const d = new Date(v);
-  return Number.isNaN(d.getTime()) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate());
-};
-const ymd = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-const enumerateDays = (start, end) => {
-  if (!(start instanceof Date) || !(end instanceof Date)) return [];
-  const out = [];
-  const cur = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-  const last = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-  while (cur <= last) { out.push(ymd(cur)); cur.setDate(cur.getDate() + 1); }
-  return out;
-};
-const humanizeRange = (dr) => {
-  if (!dr) return "the selected range";
-  switch (dr.preset) {
-    case "last7days": return "the last 7 days";
-    case "last30days": return "the last 30 days";
-    case "last90days": return "the last 90 days";
-    case "ytd": return "year to date";
-    case "alltime": return "all time";
-    default: {
-      const fmt = (d) => (d instanceof Date ? d.toLocaleDateString() : String(d ?? ""));
-      if (dr.startDate && dr.endDate) return `from ${fmt(dr.startDate)} to ${fmt(dr.endDate)}`;
-      return "the selected range";
-    }
-  }
-};
 const fmtCurrency = (n) => `$${Number(n || 0).toFixed(2)}`;
 const fmtHours = (n) => Number(n || 0).toFixed(2);
 
-// NEW: robust normalization for any incoming chartData shape
-function normalizeRow(row) {
-  // Common possible fields from contexts/backends
-  const keyRaw = row.key || row.dayKey || row.dateKey || row.date || row.day;
-  let key;
-  // Try to coerce to YYYY-MM-DD
-  if (keyRaw instanceof Date) key = ymd(keyRaw);
-  else if (typeof keyRaw === "string") {
-    const d = new Date(keyRaw);
-    key = Number.isNaN(d.getTime()) ? keyRaw : ymd(d);
-  }
-  // Fallback: if row has year/month/day numbers
-  if (!key && typeof row.year === "number" && typeof row.month === "number" && typeof row.day === "number") {
-    key = `${row.year}-${pad2(row.month)}-${pad2(row.day)}`;
-  }
+export default function ShiftsGraph({ height = 380, preset: presetProp, onPresetChange }) {
+  const { loading, error, selectors, shiftsEnhanced = [] } = useShifts();
 
-  let earnings = row.earnings ?? row.totalEarnings ?? row.sumEarnings ?? 0;
-  let hours = row.hours ?? row.totalHours ?? row.sumHours ?? 0;
+  const [mode, setMode] = useState("earnings"); 
+  const [internalPreset, setInternalPreset] = useState("last7");
+  const preset = presetProp ?? internalPreset;
+  const setPreset = onPresetChange ?? setInternalPreset;
+  const [openDrop, setOpenDrop] = useState(false);
+  const dropRef = useRef(null);
 
-  // Build display date (M/D) from key if possible
-  let dateDisp = row.dateLabel;
-  if (!dateDisp && key && /^\d{4}-\d{2}-\d{2}$/.test(key)) {
-    const [y, m, d] = key.split("-");
-    dateDisp = `${Number(m)}/${Number(d)}`;
-  }
-  // Last resort: use raw `date` or `label`
-  if (!dateDisp) dateDisp = row.date || row.label || String(key ?? "");
+  useEffect(() => {
+    const onDoc = (e) => {
+      if (!dropRef.current) return;
+      if (!dropRef.current.contains(e.target)) setOpenDrop(false);
+    };
+    document.addEventListener("click", onDoc);
+    return () => document.removeEventListener("click", onDoc);
+  }, []);
 
-  return {
-    key: key ?? String(dateDisp),
-    date: dateDisp,
-    earnings: Number(earnings) || 0,
-    hours: Number(hours) || 0,
-  };
-}
-
-export default function ShiftsGraph({ dateRange, height = 380 }) {
-  const { chartData, earningsByDay, byDay, shiftsEnhanced = [], loading, error } = useShifts();
-  const [mode, setMode] = useState("earnings"); // 'earnings' | 'hours' | 'both'
-
-  const paddedChartData = useMemo(() => {
-    const startD = toDateOnly(dateRange?.startDate);
-    const endD = toDateOnly(dateRange?.endDate);
-
-    // If we have explicit dates → build dense series from maps
-    if (startD && endD) {
-      return enumerateDays(startD, endD).map((key) => {
-        const earnings = Number(earningsByDay.get(key) || 0);
-        const hours = Number(byDay.get(key) || 0);
-        const [y, m, d] = key.split("-");
-        return { key, date: `${Number(m)}/${Number(d)}`, earnings, hours };
-        });
-    }
-
-    // ELSE (e.g., "All") → normalize whatever `chartData` shape is
-    if (Array.isArray(chartData)) {
-      return chartData.map(normalizeRow);
-    }
-    return [];
-  }, [chartData, earningsByDay, byDay, dateRange?.startDate, dateRange?.endDate]);
-
-  const allZero = paddedChartData.length > 0 && paddedChartData.every(d => d.earnings === 0 && d.hours === 0);
-  const rangeText = humanizeRange(dateRange);
+  const series = useMemo(() => selectors.buildSeries(preset), [selectors, preset]);
 
   const rolesByDay = useMemo(() => {
     const map = new Map();
-    for (const s of shiftsEnhanced || []) {
-      const key = s.dayKey;
-      if (!key) continue;
-      const title = (s.position_title || "").toString().trim();
-      if (!title) continue;
-      if (!map.has(key)) map.set(key, new Set());
-      map.get(key).add(title);
+    const start = series?.start instanceof Date ? series.start : null;
+    const end = series?.end instanceof Date ? series.end : null;
+    const inRange = (d) => {
+      if (!(start && end && d instanceof Date)) return false;
+      const ymd = (dd) =>
+        `${dd.getFullYear()}-${String(dd.getMonth() + 1).padStart(2, "0")}-${String(dd.getDate()).padStart(2, "0")}`;
+      const k = ymd(d);
+      const sk = ymd(start);
+      const ek = ymd(end);
+      return k >= sk && k <= ek;
+    };
+
+    for (const s of shiftsEnhanced) {
+      const dayKey = s.dayKey || (() => {
+        const di = new Date(s.clock_in);
+        if (Number.isNaN(di.getTime())) return null;
+        return `${di.getFullYear()}-${String(di.getMonth() + 1).padStart(2, "0")}-${String(di.getDate()).padStart(2, "0")}`;
+      })();
+
+      if (!dayKey) continue;
+
+      if (series?.start && series?.end) {
+        const di = new Date(s.clock_in);
+        if (!(di instanceof Date) || Number.isNaN(di.getTime()) || !inRange(di)) continue;
+      }
+
+      const role = (s.position_title || "").toString().trim();
+      if (!role) continue;
+
+      if (!map.has(dayKey)) map.set(dayKey, new Set());
+      map.get(dayKey).add(role);
     }
     return map;
-  }, [shiftsEnhanced]);
+  }, [shiftsEnhanced, series?.start, series?.end]);
 
-  const Header = () => (
-    <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-      <div className="text-sm text-text-secondary">
-        Showing <span className="font-medium text-text-primary">{rangeText}</span>
+  const statValue = mode === "hours"
+    ? `${Number(series.totals.hours || 0).toFixed(2)} hours`
+    : fmtCurrency(series.totals.earnings || 0);
+
+  const delta = mode === "hours" ? series.deltaPct.hours : series.deltaPct.earnings;
+  const deltaUp = (delta || 0) >= 0;
+
+  const noData = useMemo(() => {
+    const arr = series?.data || [];
+    if (!arr.length) return true;
+    return arr.every((d) => (Number(d.earnings || 0) === 0) && (Number(d.hours || 0) === 0));
+  }, [series]);
+
+  const CustomTooltip = ({ active, payload }) => {
+    if (!active || !payload || !payload.length) return null;
+    const p = payload[0]?.payload || {};
+    const rolesSet = rolesByDay.get(p.key);
+    const roles = rolesSet ? Array.from(rolesSet) : [];
+    return (
+      <div className="rounded-md border border-border-light bg-white/95 backdrop-blur p-3 shadow-lg">
+        <div className="text-sm font-semibold text-text-primary">{p.date}</div>
+        <div className="mt-2 text-sm text-text-secondary space-y-1">
+          {mode !== "hours" && (
+            <div>
+              Earnings:{" "}
+              <span className="text-text-primary font-medium">
+                {fmtCurrency(p.earnings)}
+              </span>
+            </div>
+          )}
+          {mode !== "earnings" && (
+            <div>
+              Hours:{" "}
+              <span className="text-text-primary font-medium">
+                {Number(p.hours || 0).toFixed(2)}
+              </span>
+            </div>
+          )}
+          {roles.length > 0 && (
+            <div>Roles: {roles.join(", ")}</div>
+          )}
+        </div>
       </div>
-      <div className="flex items-center gap-1.5">
-        {["earnings", "hours", "both"].map((m) => (
+    );
+  };
+
+  const optionsLabel =
+    preset === "last7" ? "Last 7 days" :
+    preset === "last30" ? "Last 30 days" :
+    preset === "last90" ? "Last 90 days" : "Last 7 days";
+
+  return (
+    <div
+      className="min-w-0 max-w-full w-full bg-white rounded-lg shadow-sm p-4 md:p-6 border border-border-light flex flex-col"
+      style={{ height }}
+    >
+      <div className="flex justify-between items-start gap-4">
+        <div>
+          <h5 className="leading-none text-3xl font-bold text-slate-900 pb-2">
+            {statValue}
+          </h5>
+          <p className="text-base font-normal text-slate-500">
+            {mode === "hours" ? "Hours" : "Earnings"} in {series.label}
+          </p>
+        </div>
+      
+        {/*Delta up/down arrow for percentage rise (currently not intuitive, commenting out until improved
+
+
+        <div className="flex items-center gap-3">
+          <div
+            className={`flex items-center px-2.5 py-0.5 text-base font-semibold ${
+              deltaUp ? "text-green-600" : "text-red-600"
+            }`}
+            title={`${deltaUp ? "Up" : "Down"} vs previous period`}
+          >
+            {`${Math.abs(delta || 0).toFixed(0)}%`}
+            <svg className={`w-3 h-3 ms-1 ${deltaUp ? "" : "rotate-180"}`} viewBox="0 0 10 14" fill="none">
+              <path d="M5 13V1M5 1L1 5m4-4 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        </div>
+        */}
+      </div>
+      
+
+      {/* modes */}
+      <div className="flex items-center gap-1.5 mt-4">
+        {["earnings", "hours"].map((m) => (
           <button
             key={m}
             onClick={() => setMode(m)}
@@ -132,86 +166,124 @@ export default function ShiftsGraph({ dateRange, height = 380 }) {
             ].join(" ")}
             aria-pressed={mode === m}
           >
-            {m === "earnings" ? "Earnings" : m === "hours" ? "Hours" : "Both"}
+            {m === "earnings" ? "Earnings" : "Hours"}
           </button>
         ))}
       </div>
-    </div>
-  );
 
-  const CustomTooltip = ({ active, payload }) => {
-    if (!active || !payload || !payload.length) return null;
-    const p = payload[0]?.payload || {};
-    const roleSet = rolesByDay.get(p.key);
-    const roles = roleSet ? Array.from(roleSet) : [];
-    return (
-      <div className="rounded-md border border-border-light bg-white/95 backdrop-blur p-3 shadow-lg">
-        <div className="text-sm font-semibold text-text-primary">{p.date}</div>
-        <div className="mt-2 text-sm text-text-secondary space-y-1">
-          {mode !== "hours" && <div>Earnings: <span className="text-text-primary font-medium">{fmtCurrency(p.earnings)}</span></div>}
-          {mode !== "earnings" && <div>Hours: <span className="text-text-primary font-medium">{fmtHours(p.hours)}</span></div>}
-          {roles.length > 0 && <div>Roles: {roles.join(", ")}</div>}
-        </div>
+      {/* chart area */}
+      <div className="flex-1 w-full mt-3 min-h-0">
+        {loading && (
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="h-10 w-10 rounded-full border-2 border-slate-300 border-t-primary animate-spin" aria-label="Loading" />
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="h-full w-full flex items-center justify-center">
+            <div className="text-sm text-red-600">{error}</div>
+          </div>
+        )}
+
+        {!loading && !error && noData && (
+          <div className="mt-2 h-full w-full flex items-center justify-center">
+            <div className="max-w-sm w-full mx-auto p-5 text-center rounded-lg border border-border-light bg-white/95 backdrop-blur shadow-sm">
+              <div className="flex items-center justify-center mb-3">
+                <img src="/clock.svg" alt="No data" className="w-20 h-20 opacity-70" />
+              </div>
+              <h3 className="text-base font-semibold text-slate-900">No shifts in this range</h3>
+              <p className="mt-1 text-sm text-slate-600">Try a different date range, or add your latest shift.</p>
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && !noData && (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={series.data} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
+              <defs>
+                <linearGradient id="areaEarnings" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--color-primary-600)" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="var(--color-primary-600)" stopOpacity="0.05" />
+                </linearGradient>
+                <linearGradient id="areaHours" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--color-secondary-500)" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="var(--color-secondary-500)" stopOpacity="0.05" />
+                </linearGradient>
+              </defs>
+
+              <CartesianGrid strokeDasharray="2 2" />
+              <XAxis dataKey="date" interval="preserveStartEnd" minTickGap={20} tickLine={false} axisLine={{ stroke: "rgba(0,0,0,0.14)" }} />
+              <YAxis tickLine={false} axisLine={{ stroke: "rgba(0,0,0,0.14)" }}
+                tickFormatter={(v) => (mode === "hours" ? Number(v || 0).toFixed(2) : `$${Number(v || 0).toFixed(0)}`)} />
+              <Tooltip content={<CustomTooltip />} />
+
+              {mode === "earnings" && (
+                <Area type="monotone" dataKey="earnings" name="Earnings"
+                  stroke="var(--color-primary-600)" fill="url(#areaEarnings)"
+                  strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
+              )}
+              {mode === "hours" && (
+                <Area type="monotone" dataKey="hours" name="Hours"
+                  stroke="var(--color-secondary-500)" fill="url(#areaHours)"
+                  strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
+              )}
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
       </div>
-    );
-  };
 
-  return (
-    <div className="w-full" style={{ height }}>
-      {loading && (
-        <div className="h-full w-full flex items-center justify-center">
-          <div className="w-full max-w-md p-6">
-            <div className="h-5 w-40 bg-slate-200 rounded animate-pulse mb-4" />
-            <div className="h-40 bg-slate-100 rounded animate-pulse" />
-          </div>
-        </div>
-      )}
+      {/* footer with dropdown */}
+      <div className="mt-4 pt-3 border-t border-border-light flex items-center justify-between">
+        <div className="relative" ref={dropRef}>
+          <button
+            type="button"
+            onClick={() => setOpenDrop((s) => !s)}
+            aria-haspopup="menu"
+            aria-expanded={openDrop ? "true" : "false"}
+            className="text-sm font-medium text-slate-600 hover:text-slate-900 inline-flex items-center"
+          >
+            {optionsLabel}
+            <svg className="w-2.5 m-2.5 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4"/>
+            </svg>
+          </button>
 
-      {!loading && error && (
-        <div className="h-full w-full flex items-center justify-center">
-          <div className="text-sm text-red-600">{error}</div>
-        </div>
-      )}
-
-      {!loading && !error && (paddedChartData.length === 0 || allZero) && (
-        <div className="h-full w-full flex items-center justify-center">
-          <div className="max-w-md w-full text-center bg-surface border border-border-light rounded-xl p-6 shadow-sm">
-            <div className="mx-auto mb-3 h-12 w-12 rounded-2xl bg-surface-hover border border-border-light flex items-center justify-center text-lg">
-              📊
+          {openDrop && (
+            <div role="menu" className="z-10 absolute left-0 mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 border border-border-light">
+              <ul className="py-2 text-sm text-gray-700" aria-label="Select date range">
+                {[
+                  { id: "last7", label: "Last 7 days" },
+                  { id: "last30", label: "Last 30 days" },
+                  { id: "last90", label: "Last 90 days" },
+                ].map(({ id, label }) => (
+                  <li key={id}>
+                    <button
+                      type="button"
+                      onClick={() => { setPreset(id); setOpenDrop(false); }}
+                      className={`w-full text-left block px-4 py-2 hover:bg-gray-100 ${
+                        preset === id ? "font-semibold text-slate-900" : ""
+                      }`}
+                      role="menuitem"
+                    >
+                      {label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <h3 className="text-lg font-semibold text-text-primary">No shifts in {rangeText}.</h3>
-            <p className="mt-1 text-sm text-text-secondary">Try a different time range, or add a new shift to see it here.</p>
-            <div className="mt-4">
-              <a href="/addShift" className="inline-flex items-center rounded-lg border border-border-light px-3 py-2 text-sm font-medium hover:bg-surface-hover">
-                Add a Shift
-              </a>
-            </div>
-          </div>
+          )}
         </div>
-      )}
 
-      {!loading && !error && paddedChartData.length > 0 && !allZero && (
-        <>
-          <Header />
-          <div className="h-[calc(100%-2.5rem)] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={paddedChartData} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" interval="preserveStartEnd" minTickGap={20} tickLine={false} axisLine={{ stroke: "rgba(0,0,0,0.14)" }} />
-                <YAxis tickLine={false} axisLine={{ stroke: "rgba(0,0,0,0.14)" }}
-                  tickFormatter={(v) => (mode === "hours" ? fmtHours(v) : `$${Number(v).toFixed(0)}`)} />
-                <Tooltip content={<CustomTooltip />} />
-                {(mode === "earnings" || mode === "both") && (
-                  <Bar dataKey="earnings" name="Earnings" fill="var(--color-primary-600)" radius={[8,8,0,0]} maxBarSize={32} animationDuration={260} />
-                )}
-                {(mode === "hours" || mode === "both") && (
-                  <Bar dataKey="hours" name="Hours" fill="var(--color-secondary-500)" radius={[8,8,0,0]} maxBarSize={32} animationDuration={320} />
-                )}
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </>
-      )}
+        <a
+          href="/paycheck-audit"
+          className="uppercase text-sm font-semibold inline-flex items-center rounded-lg text-secondary-300 hover:text-secondary-500 px-3 py-2"
+        >
+          Audit Paycheck
+          <svg className="w-2.5 h-2.5 ms-1.5 rtl:rotate-180" viewBox="0 0 6 10" fill="none">
+            <path d="m1 9 4-4-4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </a>
+      </div>
     </div>
   );
 }

@@ -1,20 +1,23 @@
 "use client";
 
 import TopNav from '../../ui/TopNav';
-import TimeDataView from './components/TimeDataView';
 import ShiftsGraph from './components/ShiftsGraph';
 import Heatmap from './components/Heatmap';
-import { useEffect, useMemo, useRef, useState } from "react";
-import { supabase } from '../../lib/supabaseClient';
-import ProfileCompletionPrompt from './components/ProfileCompletionPrompt';
+import IncomePie from "./components/IncomePie";
 import ProfilePanel from './components/ProfilePanel';
+
+
+import {useEffect, useMemo, useState} from "react";
+import {supabase} from '../../lib/supabaseClient';
+import ProfileCompletionPrompt from './components/ProfileCompletionPrompt';
 import Spreadsheet from './components/Spreadsheet';
-import { getUserWages } from '../../utils/wageUtils';
-import { getUserProfile } from '../../utils/profileUtils';
+import {getUserWages} from '../../utils/wageUtils';
+import {getUserProfile} from '../../utils/profileUtils';
 import RecentShifts from './components/RecentShifts';
-import { ShiftsProvider } from '../../context/ShiftsContext';
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRightIcon } from "@heroicons/react/20/solid";
+import {ShiftsProvider } from '../../context/ShiftsContext';
+import {motion, AnimatePresence} from "framer-motion";
+import Button from "../../ui/Button";
+import { PlusIcon } from "@heroicons/react/20/solid";
 
 export default function Dashboard() {
   const [currentTimeRange, setCurrentTimeRange] = useState(null);
@@ -23,8 +26,8 @@ export default function Dashboard() {
   const [showProfilePanel, setShowProfilePanel] = useState(false);
   const [greetingName, setGreetingName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [analyticsPreset, setAnalyticsPreset] = useState("last7");
 
-  // --- Parallax state ---
   const [scrollY, setScrollY] = useState(0);
   useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY || 0);
@@ -32,10 +35,10 @@ export default function Dashboard() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  const parallax1 = { transform: `translate3d(${scrollY * -0.06}px, ${scrollY * -0.08}px, 0)` };
-  const parallax2 = { transform: `translate3d(${scrollY * 0.04}px, ${scrollY * 0.06}px, 0)` };
+  const parallax1 = { transform: `translate3d(${scrollY * -0.05}px, ${scrollY * -0.06}px, 0)`, opacity: .45 };
+  const parallax2 = { transform: `translate3d(${scrollY * 0.035}px, ${scrollY * 0.05}px, 0)`, opacity: .40 };
 
-  // Clean OAuth hash after Google login
+  //  OAuth hash 
   useEffect(() => {
     const hash = window.location.hash;
     if (hash && hash.includes("access_token")) {
@@ -53,25 +56,26 @@ export default function Dashboard() {
         return;
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData && userData.user;
       if (!user) return;
       setCurrentUser(user);
 
       try {
         const res = await getUserWages(user.id);
-        if (res.success && (res.wages?.length ?? 0) === 0) {
+        if (res && res.success && ((res.wages && res.wages.length) || 0) === 0) {
           setShowProfilePrompt(true);
         }
 
         const prof = await getUserProfile(user.id);
-        if (prof.success && prof.profile) {
-          const fn = prof.profile.first_name || user.email?.split('@')[0] || 'Welcome';
+        if (prof && prof.success && prof.profile) {
+          const fn = prof.profile.first_name || (user.email ? user.email.split('@')[0] : '') || 'Welcome';
           setGreetingName(fn);
         } else {
-          setGreetingName(user.email?.split('@')[0] || 'Welcome');
+          setGreetingName((user.email ? user.email.split('@')[0] : '') || 'Welcome');
         }
       } catch (e) {
-        console.warn('Failed checking wages:', e?.message);
+        console.warn('Failed checking wages:', (e && e.message) ? e.message : e);
       } finally {
         setLoading(false);
       }
@@ -82,39 +86,40 @@ export default function Dashboard() {
 
   const handleTimeRangeChange = (dateRange) => setCurrentTimeRange(dateRange);
 
-  // Motion presets
+  // motion presets
   const fadeUp = useMemo(() => ({
     initial: { opacity: 0, y: 16 },
-    animate: { opacity: 1, y: 0, transition: { duration: .35, ease: "easeOut" } }
+    animate: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } }
   }), []);
 
   const card = useMemo(() => ({
-    initial: { opacity: 0, y: 14, scale: .99 },
-    whileInView: { opacity: 1, y: 0, scale: 1, transition: { duration: .35, ease: "easeOut" } },
+    initial: { opacity: 0, y: 14, scale: 0.99 },
+    whileInView: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.35, ease: "easeOut" } },
     viewport: { once: true, margin: "-10% 0px -10% 0px" }
   }), []);
 
-
-
   const handleHeroAdd = () => {
-    setTimeout(() => (window.location.href = "/addShift"), 380);
+    setTimeout(() => { window.location.href = "/addShift"; }, 380);
   };
 
   return (
     <div className="relative min-h-screen bg-background font-sans overflow-x-hidden">
-      {/* Decorative background with parallax and fixed grid */}
-      <div aria-hidden className="pointer-events-none select-none absolute inset-0 -z-10">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none select-none absolute inset-0 -z-10"
+        style={{ overflow: "clip", contain: "paint" }}  
+      >
         <div
           style={parallax1}
-          className="absolute -top-24 -right-24 h-[42rem] w-[42rem] rounded-full
-                     mix-blend-normal opacity-60
-                     bg-[radial-gradient(circle_at_center,rgba(118,193,195,.18),transparent_62%)]" />
+          className="absolute -top-24 -right-24 h-[40rem] w-[40rem] rounded-full
+                     mix-blend-normal
+                     bg-[radial-gradient(circle_at_center,rgba(118,193,195,.16),transparent_62%)]" />
         <div
           style={parallax2}
-          className="absolute -bottom-32 -left-16 h-[36rem] w-[36rem] rounded-full
-                     mix-blend-normal opacity-55
-                     bg-[radial-gradient(circle_at_center,rgba(120,147,66,.16),transparent_66%)]" />
-        <svg className="absolute inset-0 w-full h-full opacity-[.05]" xmlns="http://www.w3.org/2000/svg">
+          className="absolute -bottom-32 -left-16 h-[34rem] w-[34rem] rounded-full
+                     mix-blend-normal
+                     bg-[radial-gradient(circle_at_center,rgba(120,147,66,.14),transparent_66%)]" />
+        <svg className="absolute inset-0 w-full h-full opacity-[.04]" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="g" width="28" height="28" patternUnits="userSpaceOnUse">
               <path d="M28 0H0v28" fill="none" stroke="currentColor" />
@@ -128,7 +133,7 @@ export default function Dashboard() {
         <ProfileCompletionPrompt
           isOpen={showProfilePrompt}
           onClose={() => setShowProfilePrompt(false)}
-          userId={currentUser?.id}
+          userId={currentUser ? currentUser.id : undefined}
           onCreated={() => setShowProfilePrompt(false)}
         />
       )}
@@ -136,73 +141,46 @@ export default function Dashboard() {
         <ProfilePanel
           isOpen={showProfilePanel}
           onClose={() => setShowProfilePanel(false)}
-          userId={currentUser?.id}
+          userId={currentUser ? currentUser.id : undefined}
         />
       )}
 
       <TopNav />
 
       <ShiftsProvider>
-        <main className="relative max-w-5xl mx-auto px-5 py-8 space-y-8">
-          {/* HERO: solid white surface w/ subtle halo to prevent pastel overlap */}
-          <motion.header
-            {...fadeUp}
-            className="relative overflow-hidden rounded-2xl border border-border-light bg-white
-                       shadow-[0_12px_28px_rgba(16,24,40,.08)]"
-          >
-            {/* halo accent, but masked so it never tints text area */}
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute -right-12 -top-12 h-72 w-72 rounded-full blur-2xl opacity-70
-                              bg-[radial-gradient(45%_55%_at_60%_40%,rgba(84,141,149,.25),transparent_70%)]" />
-              <div className="absolute -left-14 -bottom-14 h-64 w-64 rounded-full blur-2xl opacity-70
-                              bg-[radial-gradient(45%_55%_at_40%_60%,rgba(120,147,66,.22),transparent_70%)]" />
-              {/* white center mask to guarantee contrast under copy */}
-              <div className="absolute inset-6 rounded-xl bg-white/85 backdrop-blur-[2px]"></div>
-            </div>
-
+        <main className="relative no-inner-scroll max-w-5xl mx-auto px-5 md:px-6 py-8 md:py-10 space-y-8 md:space-y-10">
+        
+          <motion.header {...fadeUp} className="relative overflow-hidden no-inner-scroll">
             <div className="relative p-6 md:p-8">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full
-                                 bg-primary text-text-on-primary text-sm font-semibold shadow-sm">PS</span>
-                <p className="text-xs uppercase tracking-wider text-slate-500">Personal Scheduler</p>
-              </div>
-              <h1 className="mt-3 text-3xl md:text-4xl font-semibold tracking-tight text-slate-900">
-                {`Welcome${greetingName ? `, ${greetingName}` : ''}`}
-              </h1>
-              <p className="mt-1 text-slate-600">Track shifts, earnings, and patterns — all in one place.</p>
-
-              <div className="mt-5 flex flex-wrap gap-2">
-                <button
-                  onClick={handleHeroAdd}
-                  className="group inline-flex items-center gap-2 rounded-full px-4 py-2
-                             bg-primary text-text-on-primary text-sm shadow transition-all
-                             hover:brightness-[1.05] active:scale-[.99]"
-                >
-                  Add Shift
-                  <ArrowRightIcon className="size-4 transition-transform group-hover:translate-x-0.5" />
-                </button>
-                <a
-                  href="/profile"
-                  className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm
-                             border border-border-light bg-white hover:bg-surface-hover transition-all"
-                >
-                  Profile
-                </a>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h1 className="mt-3 text-[28px] md:text-[34px] leading-tight font-semibold text-slate-900">
+                    {`Greetings${greetingName ? `, ${greetingName}` : ''}`}
+                  </h1>
+                  <p className="mt-1 text-sm md:text-[15px] text-slate-600">
+                    Track shifts, earnings, and accuracy.
+                  </p>
+                </div>
+                <div className="flex-shrink-0">
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => (window.location.href = "/addShift")}
+                  >
+                    <PlusIcon className="size-4 mr-1" />
+                    Add Shift
+                  </Button>
+                </div>
               </div>
             </div>
           </motion.header>
 
-          {/* Loading skeletons */}
           <AnimatePresence>
             {loading && (
-              <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="space-y-6"
-              >
-                {[1,2,3].map(i => (
-                  <div key={i} className="app-card overflow-hidden">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6 no-inner-scroll">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="app-card no-inner-scroll">
                     <div className="section-header">
-                      <span className="section-dot" />
                       <div className="h-4 w-40 rounded bg-slate-200 animate-pulse" />
                     </div>
                     <div className="p-6">
@@ -214,61 +192,47 @@ export default function Dashboard() {
             )}
           </AnimatePresence>
 
+          
+
           {!loading && (
             <>
-              {/* Recent Shifts */}
-              <motion.section {...card} className="app-card overflow-hidden">
+             {/* analytics */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-5 md:px-6">
+                <div className="min-w-0 rounded-xl border" style={{borderColor:'var(--border)'}}>
+                  <ShiftsGraph preset={analyticsPreset} onPresetChange={setAnalyticsPreset} />
+                </div>
+                <div className="min-w-0">
+                  <IncomePie preset={analyticsPreset} />
+                </div>
+              </div>
+              {/* recent shifts */}
+              <motion.section {...card} className="app-card overflow-hidden no-inner-scroll">
                 <div className="section-header">
                   <span className="section-dot" />
-                  <h2 className="text-base">Recent Shifts</h2>
+                  <h2 className="text-[15px] font-medium text-slate-800">Recent Shifts</h2>
                 </div>
-                <div className="p-5">
-                  <div className="space-y-4">
-                    <RecentShifts />
-                  </div>
+                <div className="p-5 md:p-6">
+                  <RecentShifts />
                 </div>
               </motion.section>
-
-              {/* Analytics (stacked) */}
-              <motion.section {...card} className="app-card overflow-hidden">
+              {/* heatmap */}
+              <motion.section {...card} className="app-card overflow-hidden no-inner-scroll">
                 <div className="section-header">
                   <span className="section-dot" />
-                  <h2 className="text-base">Shifts Analytics</h2>
+                  <h2 className="text-[15px] font-medium text-slate-800">Activity</h2>
                 </div>
-                <div className="p-5">
-                  <TimeDataView
-                    title=""
-                    onTimeRangeChange={handleTimeRangeChange}
-                    defaultTimeRange="last30days"
-                  >
-                    <ShiftsGraph
-                      dateRange={currentTimeRange}
-                      chartType="line"
-                      refreshInterval={30000}
-                      className="mt-2"
-                    />
-                  </TimeDataView>
-                </div>
-              </motion.section>
-
-              {/* Heatmap (stacked) */}
-              <motion.section {...card} className="app-card overflow-hidden">
-                <div className="section-header">
-                  <span className="section-dot" />
-                  <h2 className="text-base">Activity Heatmap</h2>
-                </div>
-                <div className="p-5">
+                <div className="p-5 md:p-6">
                   <Heatmap />
                 </div>
               </motion.section>
 
-              {/* Spreadsheet */}
-              <motion.section {...card} className="app-card overflow-hidden">
+              {/* spreadsheet */}
+              <motion.section {...card} className="app-card overflow-hidden no-inner-scroll">
                 <div className="section-header">
                   <span className="section-dot" />
-                  <h2 className="text-base">Spreadsheet</h2>
+                  <h2 className="text-[15px] font-medium text-slate-800">Spreadsheet</h2>
                 </div>
-                <div className="p-5">
+                <div className="p-5 md:p-6">
                   <Spreadsheet />
                 </div>
               </motion.section>

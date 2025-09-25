@@ -5,6 +5,22 @@ import { getUserWages } from "../utils/wageUtils";
 
 const ShiftsContext = createContext(null);
 
+// date helpers
+const pad2 = (n) => (n < 10 ? `0${n}` : `${n}`);
+const ymd = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const enumerateDays = (start, end) => {
+  const out = [];
+  let cur = midnight(start);
+  const last = midnight(end);
+  while (cur <= last) {
+    out.push(ymd(cur));
+    cur = addDays(cur, 1);
+  }
+  return out;
+};
+
 export function ShiftsProvider({ children }) {
   const [user, setUser] = useState(null);
   const [shifts, setShifts] = useState([]);
@@ -19,20 +35,18 @@ export function ShiftsProvider({ children }) {
       setLoading(true);
       setError("");
       try {
-        // Auth via Supabase
+        // Auth
         const { data: authData, error: authError } = await supabase.auth.getUser();
         if (authError) throw authError;
         const currentUser = authData?.user;
         if (!currentUser) throw new Error("Not authenticated");
         if (!cancelled) setUser(currentUser);
 
-        // Shifts via existing API route
         const res = await fetch(`/api/data?userId=${encodeURIComponent(currentUser.id)}`, { cache: "no-store" });
         if (!res.ok) throw new Error(`API /api/data error: ${res.status}`);
         const json = await res.json();
         if (!cancelled) setShifts(Array.isArray(json) ? json : []);
 
-        // Wages via existing utility (direct Supabase)
         const wagesRes = await getUserWages(currentUser.id);
         if (!cancelled) setWages(wagesRes.success ? (wagesRes.wages || []) : []);
       } catch (e) {
@@ -56,13 +70,15 @@ export function ShiftsProvider({ children }) {
     return map;
   }, [wages]);
 
-  const { shiftsEnhanced, byDay, heatmapValues, earningsByDay, chartData, spreadsheetData } = useMemo(() => {
-    // helpers
-    const pad2 = (n) => (n < 10 ? `0${n}` : `${n}`);
-    const toDayKey = (d) => {
-      if (!(d instanceof Date)) return null;
-      return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-    };
+  const {
+    shiftsEnhanced,
+    byDay,
+    heatmapValues,
+    earningsByDay,
+    chartData,
+    spreadsheetData
+  } = useMemo(() => {
+    const toDayKey = (d) => (d instanceof Date ? ymd(d) : null);
     const safeDate = (v) => {
       const d = new Date(v);
       return Number.isNaN(d.getTime()) ? null : d;
@@ -88,15 +104,14 @@ export function ShiftsProvider({ children }) {
       const hoursWorked = ms / (1000 * 60 * 60);
       const dayKey = start ? toDayKey(start) : null;
 
-      // wage/earnings
-      const posKey = String(s.position_title || '').toLowerCase().trim();
+      const posKey = String(s.position_title || "").toLowerCase().trim();
       const wage = wagesLower.get(posKey);
       const rate = Number(wage?.amount) || 0;
-      const occ = String(wage?.occurrence || 'hourly').toLowerCase();
+      const occ = String(wage?.occurrence || "hourly").toLowerCase();
       let earned = 0;
-      if (occ === 'hourly') earned = hoursWorked * rate;
-      else if (occ === 'per_shift' || occ === 'flat' || occ === 'shift') earned = rate;
-      else if (occ === 'per_day' || occ === 'daily') earned = rate;
+      if (occ === "hourly") earned = hoursWorked * rate;
+      else if (occ === "per_shift" || occ === "flat" || occ === "shift") earned = rate;
+      else if (occ === "per_day" || occ === "daily") earned = rate;
       else earned = hoursWorked * rate;
 
       enhanced.push({ ...s, hoursWorked, dayKey, earned });
@@ -107,22 +122,20 @@ export function ShiftsProvider({ children }) {
       }
     }
 
-    const heatmapVals = Array.from(hoursByDay.entries()).map(([date, hours]) => ({ date, count: Number(hours.toFixed(2)) }));
+    const heatmapVals = Array.from(hoursByDay.entries()).map(([date, hours]) => ({
+      date,
+      count: Number(hours.toFixed(2)),
+    }));
 
     const chart = Array.from(earningsByDayLocal.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([date, earnings]) => {
         const hours = hoursByDay.get(date) || 0;
-        const [y, m, d] = date.split('-');
-        return {
-          key: date,
-          date: `${Number(m)}/${Number(d)}`,
-          earnings,
-          hours,
-        };
+        const [y, m, d] = date.split("-");
+        return { key: date, date: `${Number(m)}/${Number(d)}`, earnings, hours };
       });
 
-    const spreadsheetData = enhanced.map(s => ({
+    const spreadsheetData = enhanced.map((s) => ({
       date: s.dayKey || "",
       clockIn: s.clock_in || "",
       clockOut: s.clock_out || "",
@@ -142,36 +155,80 @@ export function ShiftsProvider({ children }) {
     };
   }, [shifts, wagesMap]);
 
+  const rangeForPreset = useCallback((preset) => {
+    const today = midnight(new Date());
+    if (preset === "last30") return [addDays(today, -29), today];
+    if (preset === "last90") return [addDays(today, -89), today];
+    return [addDays(today, -6), today];
+  }, []);
+
+  const labelForPreset = useCallback(
+    (p) => (p === "last30" ? "Last 30 days" : p === "last90" ? "Last 90 days" : "Last 7 days"),
+    []
+  );
+
+  const buildSeries = useCallback(
+    (preset) => {
+      const [start, end] = rangeForPreset(preset);
+      const keys = enumerateDays(start, end);
+
+      const data = keys.map((key) => {
+        const earnings = Number(earningsByDay.get(key) || 0);
+        const hours = Number(byDay.get(key) || 0);
+        const [y, m, d] = key.split("-");
+        return { key, date: `${Number(m)}/${Number(d)}`, earnings, hours };
+      });
+
+      let curE = 0, curH = 0;
+      for (const d of data) { curE += d.earnings; curH += d.hours; }
+
+      const len = Math.max(1, Math.round((end - start) / 86400000) + 1);
+      const prevEnd = addDays(start, -1);
+      const prevStart = addDays(prevEnd, -(len - 1));
+      let prevE = 0, prevH = 0;
+      for (const key of enumerateDays(prevStart, prevEnd)) {
+        prevE += Number(earningsByDay.get(key) || 0);
+        prevH += Number(byDay.get(key) || 0);
+      }
+
+      const diffPct = (cur, prev) => {
+        if (!prev) return cur ? 100 : 0;
+        return ((cur - prev) / Math.abs(prev)) * 100;
+      };
+
+      return {
+        start, end, data,
+        totals: { earnings: curE, hours: curH },
+        prevTotals: { earnings: prevE, hours: prevH },
+        deltaPct: {
+          earnings: diffPct(curE, prevE),
+          hours: diffPct(curH, prevH),
+        },
+        label: labelForPreset(preset),
+      };
+    },
+    [rangeForPreset, labelForPreset, earningsByDay, byDay]
+  );
+
   const value = useMemo(
     () => ({
-      user,
-      shifts,
-      shiftsEnhanced,
-      wages,
-      wagesMap,
-      byDay,
-      heatmapValues,
-      earningsByDay,
-      chartData,
-      spreadsheetData,
-      loading,
-      error,
-      refresh,
+      user, shifts, shiftsEnhanced, wages, wagesMap,
+      byDay, heatmapValues, earningsByDay, chartData, spreadsheetData,
+      loading, error, refresh,
+
+      selectors: {
+        rangeForPreset,
+        labelForPreset,
+        buildSeries,
+      },
+
+      _date: { pad2, ymd, midnight, addDays, enumerateDays },
     }),
     [
-      user,
-      shifts,
-      shiftsEnhanced,
-      wages,
-      wagesMap,
-      byDay,
-      heatmapValues,
-      earningsByDay,
-      chartData,
-      spreadsheetData,
-      loading,
-      error,
-      refresh,
+      user, shifts, shiftsEnhanced, wages, wagesMap,
+      byDay, heatmapValues, earningsByDay, chartData, spreadsheetData,
+      loading, error, refresh,
+      rangeForPreset, labelForPreset, buildSeries
     ]
   );
 

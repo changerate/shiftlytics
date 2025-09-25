@@ -4,6 +4,8 @@ import Button from "./Button";
 import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { supabase } from "../lib/supabaseClient";
+import favicon from "../app/favicon.ico";
+import Image from "next/image";
 import {
   Bars3Icon,
   XMarkIcon,
@@ -17,7 +19,6 @@ export default function TopNav() {
   const [open, setOpen] = useState(false);
   const [elevated, setElevated] = useState(false);
 
-  // slight shadow on scroll -> feels less static
   useEffect(() => {
     const onScroll = () => setElevated(window.scrollY > 4);
     onScroll();
@@ -58,55 +59,32 @@ export default function TopNav() {
           {/* Left: Brand + Nav */}
           <div className="flex items-center gap-6">
             <a href="/dashboard" className="flex items-center gap-2">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-text-on-primary text-sm font-semibold shadow-sm">
-                PS
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full">
+                <Image
+                  src={favicon}
+                  alt="favicon"
+                  className="w-10 h-10"
+                  width={40}
+                  height={40}
+                />
               </span>
               <span className="text-lg font-semibold text-text-primary hover:opacity-90">
-                Personal Scheduler
+                Shiftlytics
               </span>
             </a>
 
-            <nav className="hidden md:flex items-center gap-1">
-              <a
-                href="/dashboard"
-                aria-current={isActive("/dashboard") ? "page" : undefined}
-                className={`${navLink} ${
-                  isActive("/dashboard") ? navActive : navInactive
-                }`}
-              >
-                Dashboard
-              </a>
-              <a
-                href="/paycheck-audit"
-                aria-current={isActive("/paycheck-audit") ? "page" : undefined}
-                className={`${navLink} ${
-                  isActive("/paycheck-audit") ? navActive : navInactive
-                }`}
-              >
-                Paycheck Audit
-              </a>
-            </nav>
+         
           </div>
 
-          {/* Right: Actions */}
+          {/* Right: Actions (desktop) */}
           <div className="hidden md:flex items-center gap-1.5">
-            <button
-              onClick={() => (window.location.href = "/addShift")}
-              className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-text-primary hover:bg-surface-hover"
-              aria-label="Add shift"
-              title="Add shift"
-            >
-              <PlusIcon className="size-4" />
-              Add
-            </button>
             <button
               onClick={() => (window.location.href = "/profile")}
               className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-text-primary hover:bg-surface-hover"
               aria-label="Profile"
               title="Profile"
             >
-              <UserCircleIcon className="size-5" />
-              Profile
+              <UserCircleIcon className="size-7" />
             </button>
             <button
               onClick={handleLogout}
@@ -138,63 +116,31 @@ export default function TopNav() {
             className="md:hidden pb-3 border-t border-border-light animate-in fade-in slide-in-from-top-1"
           >
             <nav className="flex flex-col gap-1 pt-3">
-              <a
-                href="/dashboard"
-                className={`px-3 py-2 rounded-md ${
-                  isActive("/dashboard")
-                    ? "bg-primary text-text-on-primary"
-                    : "text-text-primary hover:bg-surface-hover"
-                }`}
-                onClick={() => setOpen(false)}
-              >
-                Dashboard
-              </a>
-              <a
-                href="/paycheck-audit"
-                className={`px-3 py-2 rounded-md ${
-                  isActive("/paycheck-audit")
-                    ? "bg-primary text-text-on-primary"
-                    : "text-text-primary hover:bg-surface-hover"
-                }`}
-                onClick={() => setOpen(false)}
-              >
-                Paycheck Audit
-              </a>
-
-              <div className="flex gap-2 px-2 pt-2">
-                <Button
-                  variant="ghost"
-                  size="small"
-                  onClick={() => {
-                    setOpen(false);
-                    window.location.href = "/addShift";
-                  }}
-                >
-                  <PlusIcon className="size-4 mr-1" />
-                  Add Shift
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="small"
+              {/* Match desktop: Profile icon and Logout only */}
+              <div className="flex gap-2 px-2 pt-1">
+                <button
                   onClick={() => {
                     setOpen(false);
                     window.location.href = "/profile";
                   }}
+                  className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-text-primary hover:bg-surface-hover"
+                  aria-label="Profile"
+                  title="Profile"
                 >
-                  <UserCircleIcon className="size-4 mr-1" />
-                  Profile
-                </Button>
-                <Button
-                  variant="noOutlineBlack"
-                  size="small"
+                  <UserCircleIcon className="size-7" />
+                </button>
+                <button
                   onClick={() => {
                     setOpen(false);
                     handleLogout();
                   }}
+                  className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-text-primary hover:bg-surface-hover"
+                  aria-label="Logout"
+                  title="Logout"
                 >
-                  <ArrowRightOnRectangleIcon className="size-4 mr-1" />
+                  <ArrowRightOnRectangleIcon className="size-5" />
                   Logout
-                </Button>
+                </button>
               </div>
             </nav>
           </div>

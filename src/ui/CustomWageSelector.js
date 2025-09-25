@@ -103,7 +103,6 @@ export default function CustomWageSelector({ value, onChange, name, required = f
     return (
         <>
         <div className="relative" ref={dropdownRef}>
-            {/* Dropdown Button */}
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
@@ -126,7 +125,6 @@ export default function CustomWageSelector({ value, onChange, name, required = f
                 </svg>
             </button>
 
-            {/* Dropdown Menu */}
             {isOpen && (
                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
                     <div className="max-h-60 overflow-auto py-1">
@@ -164,7 +162,6 @@ export default function CustomWageSelector({ value, onChange, name, required = f
             )}
         </div>
 
-        {/* Edit Modal */}
         {showEditModal && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
@@ -181,15 +178,12 @@ export default function CustomWageSelector({ value, onChange, name, required = f
                         </button>
                     </div>
                     
-                    {/* Modal Content - Empty for now */}
                     <div className="px-6 py-8">
                         <div className="text-center text-gray-500">
                             <p>Wage editing interface will be implemented here.</p>
                             <p className="text-sm mt-2">This is a placeholder for the wage management system.</p>
                         </div>
                     </div>
-                    
-                    {/* Modal Footer */}
                     <div className="flex justify-end px-6 py-4 border-t border-gray-200 space-x-3">
                         <button
                             onClick={closeEditModal}
