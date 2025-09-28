@@ -13,13 +13,9 @@ export default function WageSelector({ value, onChange, name, required = false }
     const [wages, setWages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-
-
-
     useEffect(() => {
         const fetchWages = async () => {
             try {
-                // Get the current user
                 const { data: { user } } = await supabase.auth.getUser();
 
                 if (!user) {
@@ -57,7 +53,6 @@ export default function WageSelector({ value, onChange, name, required = false }
             return;
         }
 
-        // Find the selected wage object
         const selectedWage = wages.find(wage => wage.id.toString() === selectedValue);
 
         if (selectedWage) {
@@ -65,7 +60,6 @@ export default function WageSelector({ value, onChange, name, required = false }
                 target: {
                 name,
                 value: selectedValue,
-                // Add additional data that might be useful
                 selectedWage: selectedWage
                 }
             });
@@ -90,7 +84,6 @@ export default function WageSelector({ value, onChange, name, required = false }
         );
     }
 
-    // console.log("The wages are: ", wages);
     return (
         <select
             name={name}

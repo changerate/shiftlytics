@@ -42,7 +42,10 @@ export function ShiftsProvider({ children }) {
         if (!currentUser) throw new Error("Not authenticated");
         if (!cancelled) setUser(currentUser);
 
-        const res = await fetch(`/api/data?userId=${encodeURIComponent(currentUser.id)}`, { cache: "no-store" });
+        const { data: sessionWrap } = await supabase.auth.getSession();
+        const token = sessionWrap?.session?.access_token;
+        const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+        const res = await fetch(`/api/data`, { cache: "no-store", headers });
         if (!res.ok) throw new Error(`API /api/data error: ${res.status}`);
         const json = await res.json();
         if (!cancelled) setShifts(Array.isArray(json) ? json : []);
