@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 import { createClient } from "@supabase/supabase-js";
+import { createServerSupabaseWithAuth } from "../../../lib/authServerSupabase";
 
-export async function POST(req) {
+export async function POST(req: Request) {
   try {
-    const { user } = await req.json();
-    if (!user?.id || !user?.email) {
-      return NextResponse.json({ error: "Missing user" }, { status: 400 });
-    }
+    const auth = req.headers.get("authorization") || "";
+    const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const supabaseUserScoped = createServerSupabaseWithAuth(token);
+    const { data: userRes } = await supabaseUserScoped.auth.getUser();
+    const user = userRes?.user;
+    if (!user?.id || !user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const supabaseService = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -17,10 +22,10 @@ export async function POST(req) {
     const payload = {
       user_id: user.id,
       email: user.email,
-      first_name: user.first_name || "",
-      last_name: user.last_name || "",
-      company: user.company || "",
-      position: user.position || "",
+      first_name: user.user_metadata?.first_name || "",
+      last_name: user.user_metadata?.last_name || "",
+      company: user.user_metadata?.company || "",
+      position: user.user_metadata?.position || "",
     };
 
     const { error } = await supabaseService

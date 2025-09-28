@@ -1,38 +1,33 @@
 import { NextRequest } from "next/server";
-import { ensureUserProfile, updateUserProfile, getUserProfile } from "../../../utils/profileUtils";
+import { createServerSupabaseWithAuth } from "../../../lib/authServerSupabase";
 
-// GET /api/profiles?userId=123
 export async function GET(request: NextRequest) {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
-    if (!userId) {
-        return new Response(JSON.stringify({ error: "Missing userId" }), { status: 400 });
-    }
-    const result = await getUserProfile(userId);
-    if (!result.success) {
-        return new Response(JSON.stringify({ error: result.error }), { status: 404 });
-    }
-    return Response.json(result.profile);
+  const auth = request.headers.get("authorization") || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+  if (!token) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  try {
+    const supabase = createServerSupabaseWithAuth(token);
+    const { data: userRes } = await supabase.auth.getUser();
+    const user = userRes?.user;
+    if (!user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    if (error) return new Response(JSON.stringify({ error: error.message }), { status: 404 });
+    return Response.json(data ?? null);
+  } catch (e: any) {
+    return new Response(JSON.stringify({ error: e?.message || "Server error" }), { status: 500 });
+  }
 }
 
-export async function POST(request: NextRequest) {
-    const body = await request.json();
-    const result = await ensureUserProfile(body.user);
-    if (!result.success) {
-        return new Response(JSON.stringify({ error: result.error }), { status: 400 });
-    }
-    return Response.json(result.profile);
+export async function POST() {
+  return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
 }
 
-export async function PUT(request: NextRequest) {
-    const body = await request.json();
-    const { userId, updates } = body;
-    if (!userId || !updates) {
-        return new Response(JSON.stringify({ error: "Missing userId or updates" }), { status: 400 });
-    }
-    const result = await updateUserProfile(userId, updates);
-    if (!result.success) {
-        return new Response(JSON.stringify({ error: result.error }), { status: 400 });
-    }
-    return Response.json(result.profile);
+export async function PUT() {
+  return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
 }

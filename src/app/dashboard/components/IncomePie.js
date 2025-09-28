@@ -51,7 +51,7 @@ export default function IncomePie({ preset = "last7" }) {
       datasets: [
         {
           data: [net, taxes],
-          backgroundColor: ["#45747b", "#d5e5e8"],
+          backgroundColor: ["#45747b", ""],
           borderColor: ["#3b6268", "#657d38"],
           borderWidth: 1,
         },

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from '../../../lib/supabaseClient';
+import {useEffect, useState} from "react";
+import {useRouter} from "next/navigation";
+import {supabase} from '../../../lib/supabaseClient';
 
 export default function OAuthCallback() {
   const [err, setErr] = useState("");
@@ -10,7 +10,6 @@ export default function OAuthCallback() {
 
   useEffect(() => {
     const run = async () => {
-      // After redirect, Supabase sets session in localStorage automatically.
       const { data, error } = await supabase.auth.getSession();
       if (error || !data?.session) {
         setErr(error?.message || "No session after OAuth.");
@@ -19,20 +18,14 @@ export default function OAuthCallback() {
 
       const user = data.session.user;
 
-      // Ensure profile on server (service key bypasses RLS there)
+      // Ensure profile on server
       const res = await fetch("/api/ensure-profile", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user: {
-            id: user.id,
-            email: user.email,
-            first_name: user.user_metadata?.first_name || "",
-            last_name: user.user_metadata?.last_name || "",
-            company: user.user_metadata?.company || "",
-            position: user.user_metadata?.position || "",
-          },
-        }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${data.session.access_token}`,
+        },
+        body: JSON.stringify({}),
       });
 
       if (!res.ok) {

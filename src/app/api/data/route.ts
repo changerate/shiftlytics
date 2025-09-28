@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createServerSupabaseWithAuth } from "../../../lib/authServerSupabase";
 function generateSampleData() {
     const data = [];
     const now = new Date();
@@ -29,33 +29,25 @@ function generateSampleData() {
 
 
 export async function GET(request: Request) {
-    try {
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
-        );
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get('userId');
+  try {
+    const auth = request.headers.get("authorization") || "";
+    const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+    if (!token) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-        let query = supabase.from('shifts').select('*');
-        if (userId) {
-            query = query.eq('user_id', userId);
-        }
-        const { data, error } = await query;
-        
-        if (error) {
-            console.warn('Supabase error, falling back to sample data:', error.message);
-            return Response.json(generateSampleData(), { headers: { 'Cache-Control': 'no-store' } });
-        }
-        
-        if (!data || data.length === 0) {
-            console.log('No data found in database, returning sample data');
-            return Response.json(generateSampleData(), { headers: { 'Cache-Control': 'no-store' } });
-        }
-        
-        return Response.json(data, { headers: { 'Cache-Control': 'no-store' } });
-    } catch (error) {
-        console.error('API error:', error);
-        return Response.json(generateSampleData(), { headers: { 'Cache-Control': 'no-store' } });
-    }
+    const supabase = createServerSupabaseWithAuth(token);
+    const { data: userRes } = await supabase.auth.getUser();
+    const user = userRes?.user;
+    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { data, error } = await supabase
+      .from("shifts")
+      .select("*")
+      .eq("user_id", user.id);
+
+    if (error) return Response.json({ error: error.message }, { status: 500 });
+    return Response.json(data ?? [], { headers: { "Cache-Control": "no-store" } });
+  } catch (error: any) {
+    console.error("/api/data error:", error?.message || error);
+    return Response.json({ error: "Server error" }, { status: 500 });
+  }
 }
