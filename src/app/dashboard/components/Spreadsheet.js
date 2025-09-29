@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useShifts } from "../../../context/ShiftsContext";
 import BasicMenu from "../../../ui/BasicMenu";
-import { DocumentArrowDownIcon, ArrowDownTrayIcon } from '@heroicons/react/20/solid'
+import { DocumentArrowDownIcon, ArrowDownTrayIcon, PencilSquareIcon } from '@heroicons/react/20/solid'
+import UpdateShiftModal from "./UpdateShiftModal";
 
 function formatClockTime(iso) {
   if (!iso) return "";
@@ -12,6 +13,7 @@ function formatClockTime(iso) {
 }
 
 const columns = [
+  { key: "_edit", label: "" },
   { key: "date", label: "Date" },
   { key: "earnings", label: "Earnings", format: v => `$${Number(v).toFixed(2)}` },
   { key: "clockIn", label: "Clock In", format: formatClockTime },
@@ -55,12 +57,17 @@ async function exportToPDF(data, columns, filename = `spreadsheet-${new Date().t
 }
 
 export default function Spreadsheet() {
-  const { spreadsheetData = [], loading, error } = useShifts();
+  const { spreadsheetData = [], shiftsEnhanced = [], loading, error, refresh } = useShifts();
   const [expanded, setExpanded] = useState(false);
   const [exporting, setExporting] = useState(null);
+  const exportColumns = useMemo(() => columns.filter(c => c.key !== "_edit"), []);
+  const [editing, setEditing] = useState(null); // shift object
 
-  if (loading) return <div>Loading…</div>;
-  if (error) return <div style={{ color: "red" }}>Error: {error}</div>;
+  const enhancedById = useMemo(() => {
+    const m = new Map();
+    for (const s of shiftsEnhanced || []) m.set(s.id, s);
+    return m;
+  }, [shiftsEnhanced]);
 
   const menuOptions = [
     {
@@ -69,7 +76,7 @@ export default function Spreadsheet() {
       disabled: loading || spreadsheetData.length === 0 || !!exporting,
       icon: <ArrowDownTrayIcon className="size-4" aria-hidden />,
       onClick: async () => {
-        try { setExporting('csv'); exportToCSV(spreadsheetData, columns); } finally { setExporting(null); }
+        try { setExporting('csv'); exportToCSV(spreadsheetData, exportColumns); } finally { setExporting(null); }
       },
     },
     {
@@ -78,7 +85,7 @@ export default function Spreadsheet() {
       disabled: loading || spreadsheetData.length === 0 || !!exporting,
       icon: <DocumentArrowDownIcon className="size-4" aria-hidden />,
       onClick: async () => {
-        try { setExporting('pdf'); await exportToPDF(spreadsheetData, columns); } finally { setExporting(null); }
+        try { setExporting('pdf'); await exportToPDF(spreadsheetData, exportColumns); } finally { setExporting(null); }
       },
     },
   ];
@@ -118,11 +125,30 @@ export default function Spreadsheet() {
             <tbody>
               {visibleRows.map((row, idx) => (
                 <tr key={row.date + idx} className="odd:bg-neutral-50/60 even:bg-neutral-200/30 dark:odd:bg-gray-800 dark:even:bg-gray-900">
-                  {columns.map((col) => (
-                    <td key={col.key} className="px-6 py-3 border-b border-neutral-200/70 dark:border-gray-700/70">
-                      {col.format ? col.format(row[col.key]) : row[col.key]}
-                    </td>
-                  ))}
+                  {columns.map((col) => {
+                    if (col.key === "_edit") {
+                      return (
+                        <td key="_edit" className="px-6 py-3 border-b border-neutral-200/70 dark:border-gray-700/70">
+                          <button
+                            className="inline-flex items-center justify-center rounded-md border border-[color:var(--color-border-light)] px-2 py-1 text-sm hover:bg-[color:var(--color-surface-hover)]"
+                            onClick={() => {
+                              const full = enhancedById.get(row.id);
+                              setEditing(full || null);
+                            }}
+                            aria-label="Edit shift"
+                            title="Edit shift"
+                          >
+                            <PencilSquareIcon className="size-4" aria-hidden />
+                          </button>
+                        </td>
+                      );
+                    }
+                    return (
+                      <td key={col.key} className="px-6 py-3 border-b border-neutral-200/70 dark:border-gray-700/70">
+                        {col.format ? col.format(row[col.key]) : row[col.key]}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
@@ -155,7 +181,16 @@ export default function Spreadsheet() {
           </div>
         )}
       </div>
+      {editing && (
+        <UpdateShiftModal
+          shift={editing}
+          onClose={() => setEditing(null)}
+          onSaved={() => { setEditing(null); refresh(); }}
+          onDeleted={() => { setEditing(null); refresh(); }}
+        />
+      )}
     </>
   );
 }
+
 

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, cloneElement } from "react";
 import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
 import { useShifts } from "../../../context/ShiftsContext";
@@ -51,15 +51,14 @@ export default function Heatmap() {
         classForValue={classForValue}
         titleForValue={titleForValue}
         showWeekdayLabels
-        transformDayElement={(element, value) => (
-          <g
-            onMouseEnter={(e) => handleEnter(e, value)}
-            onMouseMove={(e) => handleEnter(e, value)}
-            onMouseLeave={handleLeave}
-          >
-            {element}
-          </g>
-        )}
+        transformDayElement={(element, value) =>
+          cloneElement(element, {
+            onMouseEnter: (e) => handleEnter(e, value),
+            onMouseMove: (e) => handleEnter(e, value),
+            onMouseLeave: handleLeave,
+            key: value?.date ?? element.key,
+          })
+        }
       />
       {tip.show && (
         <div
