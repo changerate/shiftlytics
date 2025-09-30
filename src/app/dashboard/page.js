@@ -208,7 +208,6 @@ export default function Dashboard() {
               {/* recent shifts */}
               <motion.section {...card} className="app-card overflow-hidden no-inner-scroll">
                 <div className="section-header">
-                  <span className="section-dot" />
                   <h2 className="text-[15px] font-medium text-slate-800">Recent Shifts</h2>
                 </div>
                 <div className="p-5 md:p-6">
@@ -218,7 +217,6 @@ export default function Dashboard() {
               {/* heatmap */}
               <motion.section {...card} className="app-card overflow-hidden no-inner-scroll">
                 <div className="section-header">
-                  <span className="section-dot" />
                   <h2 className="text-[15px] font-medium text-slate-800">Activity</h2>
                 </div>
                 <div className="p-5 md:p-6">
@@ -229,7 +227,6 @@ export default function Dashboard() {
               {/* spreadsheet */}
               <motion.section {...card} className="app-card overflow-hidden no-inner-scroll">
                 <div className="section-header">
-                  <span className="section-dot" />
                   <h2 className="text-[15px] font-medium text-slate-800">Spreadsheet</h2>
                 </div>
                 <div className="p-5 md:p-6">

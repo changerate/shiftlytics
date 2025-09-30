@@ -94,7 +94,7 @@ export default function Spreadsheet() {
 
   return (
     <>
-      <div className="mb-5 flex justify-end">
+      <div className="mb-5 flex justify-end sm:justify-end justify-between">
         <BasicMenu name="Export" options={menuOptions} />
       </div>
       <div
@@ -103,56 +103,58 @@ export default function Spreadsheet() {
         shadow-[inset_8px_8px_16px_rgba(0,0,0,0.12),_inset_-8px_-8px_16px_rgba(255,255,255,0.7)] 
         dark:shadow-[inset_8px_8px_16px_rgba(0,0,0,0.55),_inset_-8px_-8px_16px_rgba(255,255,255,0.05)]"
       >
-        <div
-          className={`transition-all duration-500 ease-in-out ${
-            expanded ? "max-h-[1000px]" : "max-h-[260px]"
-          } overflow-hidden rounded-2xl`}
-        >
-          <table className="w-full text-sm text-left rtl:text-right text-gray-600 dark:text-gray-300">
-            <thead className="text-xs uppercase text-neutral-600 dark:text-neutral-300 bg-transparent border-b border-neutral-300/70 dark:border-gray-700">
+        <div className="overflow-x-auto -mx-2 sm:mx-0">
+          <div
+            className={`transition-all duration-500 ease-in-out ${
+              expanded ? "max-h-[1000px]" : "max-h-[260px]"
+            } overflow-hidden rounded-2xl`}
+          >
+            <table className="w-full text-xs sm:text-sm text-left rtl:text-right text-gray-600 dark:text-gray-300">
+              <thead className="text-[11px] sm:text-xs uppercase text-neutral-600 dark:text-neutral-300 bg-transparent border-b border-neutral-300/70 dark:border-gray-700">
               <tr>
                 {columns.map((col, idx) => (
                   <th
                     key={col.key}
                     scope="col"
-                    className={`px-6 py-3 ${idx === 0 ? "rounded-s-lg" : ""} ${idx === columns.length - 1 ? "rounded-e-lg" : ""}`}
+                    className={`px-2 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 ${idx === 0 ? "rounded-s-lg" : ""} ${idx === columns.length - 1 ? "rounded-e-lg" : ""}`}
                   >
                     {col.label}
                   </th>
                 ))}
               </tr>
-            </thead>
-            <tbody>
-              {visibleRows.map((row, idx) => (
-                <tr key={row.date + idx} className="odd:bg-neutral-50/60 even:bg-neutral-200/30 dark:odd:bg-gray-800 dark:even:bg-gray-900">
-                  {columns.map((col) => {
-                    if (col.key === "_edit") {
+              </thead>
+              <tbody>
+                {visibleRows.map((row, idx) => (
+                  <tr key={row.date + idx} className="odd:bg-neutral-50/60 even:bg-neutral-200/30 dark:odd:bg-gray-800 dark:even:bg-gray-900">
+                    {columns.map((col) => {
+                      if (col.key === "_edit") {
+                        return (
+                          <td key="_edit" className="px-2 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 border-b border-neutral-200/70 dark:border-gray-700/70">
+                            <button
+                              className="inline-flex items-center justify-center rounded-md border border-[color:var(--color-border-light)] px-2 py-1 text-sm hover:bg-[color:var(--color-surface-hover)]"
+                              onClick={() => {
+                                const full = enhancedById.get(row.id);
+                                setEditing(full || null);
+                              }}
+                              aria-label="Edit shift"
+                              title="Edit shift"
+                            >
+                              <PencilSquareIcon className="size-4" aria-hidden />
+                            </button>
+                          </td>
+                        );
+                      }
                       return (
-                        <td key="_edit" className="px-6 py-3 border-b border-neutral-200/70 dark:border-gray-700/70">
-                          <button
-                            className="inline-flex items-center justify-center rounded-md border border-[color:var(--color-border-light)] px-2 py-1 text-sm hover:bg-[color:var(--color-surface-hover)]"
-                            onClick={() => {
-                              const full = enhancedById.get(row.id);
-                              setEditing(full || null);
-                            }}
-                            aria-label="Edit shift"
-                            title="Edit shift"
-                          >
-                            <PencilSquareIcon className="size-4" aria-hidden />
-                          </button>
+                        <td key={col.key} className="px-2 py-1.5 sm:px-4 sm:py-2 md:px-6 md:py-3 border-b border-neutral-200/70 dark:border-gray-700/70">
+                          {col.format ? col.format(row[col.key]) : row[col.key]}
                         </td>
                       );
-                    }
-                    return (
-                      <td key={col.key} className="px-6 py-3 border-b border-neutral-200/70 dark:border-gray-700/70">
-                        {col.format ? col.format(row[col.key]) : row[col.key]}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {!expanded && (spreadsheetData.length - 3) > 0 && (
@@ -181,6 +183,7 @@ export default function Spreadsheet() {
           </div>
         )}
       </div>
+      {/* End table view */}
       {editing && (
         <UpdateShiftModal
           shift={editing}

@@ -18,6 +18,9 @@
   --shadow: 0 12px 28px rgba(16,24,40,.08);
 }
 
+
+
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -90,6 +93,7 @@
     --brand:#8daa57;
     --brand-hover:#a4c16a;
   }
+ 
 }
 
 html, body { height: 100%; }
@@ -100,7 +104,8 @@ body {
     radial-gradient(900px 500px at -10% 20%, rgba(120,147,66,.06), transparent 55%),
     var(--background);
   color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  /* Use themed font first for consistency across dashboard */
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   overflow: visible; 
 }
 
@@ -145,8 +150,43 @@ body {
 .react-calendar-heatmap .color-gitlab-3 rect { fill: #82ced1; }
 .react-calendar-heatmap .color-gitlab-4 rect { fill: #548D95; }
 
+/* Ensure heatmap month/weekday labels use theme fonts + sizing */
+/* Month + weekday labels (SVG <text>) */
+.react-calendar-heatmap text.react-calendar-heatmap-month-label,
+.react-calendar-heatmap text.react-calendar-heatmap-weekday-label,
+.react-calendar-heatmap .react-calendar-heatmap-month-label,
+.react-calendar-heatmap .react-calendar-heatmap-weekday-label {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial !important;
+  font-size: 0.7rem !important; /* ~11.2px default */
+  line-height: 1.1 !important;
+  fill: var(--color-text-secondary) !important;
+}
+
 .table{ width:100%; border-collapse:separate; border-spacing:0 6px; }
 .table thead th{ font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:#475569; font-weight:600; padding:.5rem .75rem; }
 .table tbody tr{ background:#fff; border:1px solid var(--border); box-shadow:0 1px 2px rgba(16,24,40,.03); }
 .table td{ padding:.65rem .75rem; color:var(--text); }
 .table td.num{ text-align:right; font-variant-numeric: tabular-nums; }
+
+@layer utilities {
+  /* Tweak react-calendar-heatmap labels for small screens */
+  @media (max-width: 900px) {
+    /* Month labels are SVG <text> elements; use plain CSS + !important for reliability */
+    .react-calendar-heatmap text.react-calendar-heatmap-month-label,
+    .react-calendar-heatmap text.react-calendar-heatmap-weekday-label,
+    .react-calendar-heatmap .react-calendar-heatmap-month-label,
+    .react-calendar-heatmap .react-calendar-heatmap-weekday-label {
+      font-size: 0.55rem !important; /* ~8.8px on small screens */
+      line-height: 1.05 !important; /* tighter */
+      letter-spacing: .01em !important;
+    }
+  }
+  @media (max-width: 480px) {
+    .react-calendar-heatmap text.react-calendar-heatmap-month-label,
+    .react-calendar-heatmap text.react-calendar-heatmap-weekday-label,
+    .react-calendar-heatmap .react-calendar-heatmap-month-label,
+    .react-calendar-heatmap .react-calendar-heatmap-weekday-label {
+      font-size: 0.5rem !important; /* ~8px for very small screens */
+    }
+  }
+}
