@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import Button from '../../../ui/Button.js';
 
@@ -16,6 +17,11 @@ export default function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  //const [mailalert, setMailalert] = useState(false);
+  const [mailalert, setMailalert] = useState(false);
+
+
   const router = useRouter();
 
  const handleSignUp = async (e) => {
@@ -42,16 +48,20 @@ export default function SignUp() {
     }),
   });
   const result = await res.json();
+
+  // needing auth confirmation will not be 'ok'
   if (!result.ok) {
-    setError(result.error);
+    setMailalert(true);
+   // alert(result.message);
     setLoading(false);
-    return;
+   // return;
   }
-  alert(result.message);
-  setLoading(false);
-  router.push("/login");
+    
 };
+ 
   return (
+    <>
+   {!mailalert ? (
     <div
       className="bg-background min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8"
     >
@@ -230,6 +240,30 @@ export default function SignUp() {
           </p>
         </div>
       </div>
-    </div>
-  );
+    </div> 
+    ) : (
+      <div className="min-h-screen bg-background flex items-center justify-center px-5 py-10">
+        <div className="w-full max-w-md">
+          <div className="app-card p-10 md:p-8 text-center">
+            <Image
+              src="/mail.svg"
+              alt="Check email"
+              width={300}
+              height={300}
+              className="mx-auto mb-4 md:mb-5 h-auto w-28 md:w-40"
+              priority
+            />
+            <h1 className="text-xl md:text-2xl font-semibold text-[color:var(--color-text-primary)]">Check your email</h1>
+            <p className="mt-2 text-sm md:text-[15px] text-[color:var(--color-text-secondary)]">
+              Sign-up successful! Please confirm your account via the link we sent to your inbox.
+            </p>
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <a href="/login" className="btn btn-primary">Go to Login</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    ) }
+    </>
+  ); 
 }
