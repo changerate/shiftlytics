@@ -47,12 +47,14 @@ export default function SignUp() {
       position
     }),
   });
+
+  console.log("res:", res);
   const result = await res.json();
+
 
   // needing auth confirmation will not be 'ok'
   if (!result.ok) {
     setMailalert(true);
-   // alert(result.message);
     setLoading(false);
    // return;
   }
@@ -255,7 +257,7 @@ export default function SignUp() {
             />
             <h1 className="text-xl md:text-2xl font-semibold text-[color:var(--color-text-primary)]">Check your email</h1>
             <p className="mt-2 text-sm md:text-[15px] text-[color:var(--color-text-secondary)]">
-              Sign-up successful! Please confirm your account via the link we sent to your inbox.
+              Please check your email for confirmation.
             </p>
             <div className="mt-6 flex items-center justify-center gap-3">
               <a href="/login" className="btn btn-primary">Go to Login</a>
