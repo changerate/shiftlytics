@@ -37,7 +37,7 @@ _Parser tool to audit your paychecks for accuracy by coming the number of hours 
   - [Tailwind CSS](https://tailwindcss.com/) for styling
   - [React.js]() for UI framework
 - **Database**
-  [Supabase]() for Data storage and user authentication 
+  - [Supabase]() for Data storage and user authentication 
 
 ## 🛠️ Installation
 
