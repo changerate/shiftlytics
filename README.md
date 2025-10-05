@@ -12,11 +12,22 @@ A Shift and Income CRUDtracking tool used to provide spreasheet-tracking and dat
 
 ## 📸 Screenshots
 
-![Home Page](public/screenshots/Home.png)
-_Friendly landing page for users to upload their university transcript_
+![Login](public/screenshots/login.png)
+_Friendly login page for users to sign back in or sign up for our service_
 
-![Calendar View](public/screenshots/Schedule.png)
-_Calendar view with course recommendations for easy scheduling_
+
+![Add Shifts](public/screenshots/add_shift.png)
+_Log new shifts as they come, recorded using seperate work titles, and add your lunch breaks in for accurate accounting_
+
+![Data Charts](public/screenshots/dashboard1.png, public/screenshots/dashboard2.png)
+_Graph, Pie Chart, and Heatmap for data visualization_
+
+![Data Export](public/screenshots/dashboard3.png)
+_Option to export your recorded data as either a PDF or CSV file for personal keep and offline accessibility_
+
+![Audit Feature](public/screenshots/audit.png)
+_Parser tool to audit your paychecks for accuracy by coming the number of hours recorded with what you logged on our app_
+
 
 ## 🚀 Tech Stack
 
@@ -44,7 +55,8 @@ npm install
 3. Create a `.env.local` file and add your Gemini API key:
 
 ```bash
-GEMINI_API_KEY="your-api-key"
+NEXT_PUBLIC_SUPABASE_URL= (YOUR SUPABASE PUBLIC URL)
+NEXT_PUBLIC_SUPABASE_ANON_KEY=(YOUR SUPABASE PUBLIC ANON KEY)
 ```
 
 4. Start the development server:
@@ -63,14 +75,6 @@ npm run dev
 ## 🙏 Acknowledgments
 
 ### The Team:
+- **Alaaddin Ghosheh**
+- **Carlos Vargas**
 
-- **Andy Kuang** - Frontend & UX Design
-- **Charles Phu** - Backend & Webscraper
-- **Ashwin Vinod** - Backend & Gemini
-- **Alaaddin Ghosheh** - Backend & Gemini
-
-Special thanks to the CruzHacks 2025 organizing team for hosting an amazing hackathon that made this project possible
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
