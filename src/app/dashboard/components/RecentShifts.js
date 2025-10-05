@@ -60,11 +60,6 @@ export default function RecentShifts() {
 
   return (
     <section className="p-4">
-      <header className="mb-3">
-        <h3 className="text-lg font-semibold">Recent Shifts</h3>
-        <p className="text-sm text-gray-500">{user?.email || "—"}</p>
-      </header>
-
       {recent.length === 0 ? (
         <div className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm">
           <div className="mx-auto mb-2 h-10 w-10 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center">dY"-</div>
