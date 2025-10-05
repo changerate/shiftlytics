@@ -19,7 +19,8 @@ _Friendly login page for users to sign back in or sign up for our service_
 ![Add Shifts](public/screenshots/add_shift.png)
 _Log new shifts as they come, recorded using seperate work titles, and add your lunch breaks in for accurate accounting_
 
-![Data Charts](public/screenshots/dashboard1.png, public/screenshots/dashboard2.png)
+![Data Charts](public/screenshots/dashboard1.png)
+![Data Charts2](public/screenshots/dashboard2.png)
 _Graph, Pie Chart, and Heatmap for data visualization_
 
 ![Data Export](public/screenshots/dashboard3.png)
