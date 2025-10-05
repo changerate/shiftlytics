@@ -142,7 +142,10 @@ body {
 .react-calendar-heatmap .color-gitlab-1 rect { fill: #b2e3e4; }
 .react-calendar-heatmap .color-gitlab-2 rect { fill: #95d6d8; }
 .react-calendar-heatmap .color-gitlab-3 rect { fill: #82ced1; }
-.react-calendar-heatmap .color-gitlab-4 rect { fill: #548D95; }
+.react-calendar-heatmap text.react-calendar-heatmap-weekday-label,
+.react-calendar-heatmap .react-calendar-heatmap-weekday-label {
+  transform: translateX(-6px);
+}
 
 /* Ensure heatmap month/weekday labels use theme fonts + sizing */
 .react-calendar-heatmap text.react-calendar-heatmap-month-label,
@@ -218,3 +221,4 @@ button[disabled],
 [aria-disabled="true"] {
   cursor: not-allowed;
 }
+
