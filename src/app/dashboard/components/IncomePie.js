@@ -1,4 +1,5 @@
 "use client";
+
 import { useMemo, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
@@ -25,7 +26,14 @@ const rangeForPreset = (preset) => {
   const today = midnight(new Date());
   if (preset === "last30") return [addDays(today, -29), today];
   if (preset === "last90") return [addDays(today, -89), today];
-  return [addDays(today, -6), today]; // default last7
+  return [addDays(today, -6), today];
+};
+
+const palette = {
+  netFill: "#3f6b72",
+  netStroke: "#34565c",
+  taxFill: "#9aa363",
+  taxStroke: "#7d874f",
 };
 
 export default function IncomePie({ preset = "last7" }) {
@@ -50,21 +58,52 @@ export default function IncomePie({ preset = "last7" }) {
       labels: ["Net Income", "Taxes"],
       datasets: [
         {
-          data: [net, taxes],
-          backgroundColor: ["#45747b", ""],
-          borderColor: ["#3b6268", "#657d38"],
-          borderWidth: 1,
+          data: [Math.max(net, 0), Math.max(taxes, 0)],
+          backgroundColor: [palette.netFill, palette.taxFill],
+          borderColor: [palette.netStroke, palette.taxStroke],
+          borderWidth: 2,
+          hoverOffset: 6,
         },
       ],
     }),
     [net, taxes]
   );
 
+  const chartOptions = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "68%",
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            usePointStyle: true,
+            boxWidth: 10,
+            padding: 16,
+            color: "#475569",
+            font: { size: 12 },
+          },
+        },
+        // keep this comment outside the object in your file or use // like this
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const val = Number(ctx.raw ?? 0);
+              return `${ctx.label}: $${val.toFixed(2)}`;
+            },
+          },
+        },
+      },
+    }),
+    []
+  );
+
   const empty = !loading && !error && gross <= 0;
 
   return (
-    <div className="min-w-0 w-full bg-white rounded-lg shadow-sm border border-border-light p-4 md:p-6 flex flex-col">
-      <div className="flex items-center justify-between mb-3">
+    <div className="min-w-0 w-full bg-white rounded-lg shadow-sm border border-border-light p-4 md:p-6 flex flex-col overflow-hidden">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <h5 className="text-xl font-bold leading-none text-slate-900">Breakdown</h5>
           <button
@@ -93,18 +132,26 @@ export default function IncomePie({ preset = "last7" }) {
         </div>
       </div>
 
-      <div className="py-4">
-        <div className="h-56 w-full rounded-lg bg-slate-50 border border-border-light flex items-center justify-center">
+      <div className="py-4 flex-1">
+        <div className="relative h-[240px] sm:h-[260px] md:h-[300px] rounded-xl border border-border-light bg-slate-50/70 flex items-center justify-center px-4">
           {loading ? (
-            <div className="text-slate-500 text-sm">Loading…</div>
+            <div className="text-slate-500 text-sm">Loading...</div>
           ) : error ? (
             <div className="text-red-600 text-sm">{String(error)}</div>
           ) : empty ? (
             <div className="text-slate-500 text-sm">No earnings in range</div>
           ) : (
-            <Doughnut data={chartData} />
+            <div className="w-full h-full">
+              <Doughnut data={chartData} options={chartOptions} />
+            </div>
           )}
         </div>
+      </div>
+
+      {/* Spacer footer to align with ShiftsGraph's footer (keeps dropdown rows level) */}
+      <div className="mt-4 pt-3 border-t border-transparent flex items-center justify-between">
+        <span className="text-sm invisible">spacer</span>
+        <span className="text-sm invisible">spacer</span>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useMemo, useState, useRef, useEffect } from "react";
 import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area,
@@ -6,15 +6,38 @@ import {
 import { useShifts } from "../../../context/ShiftsContext";
 
 const fmtCurrency = (n) => `$${Number(n || 0).toFixed(2)}`;
-const fmtHours = (n) => Number(n || 0).toFixed(2);
 
-export default function ShiftsGraph({ height = 380, preset: presetProp, onPresetChange }) {
+/**
+ * Pixel-snap wrapper to prevent sub-pixel width changes while scrolling,
+ * which cause Recharts to re-measure and blink axis labels.
+ */
+function useSnappedWidth() {
+  const ref = useRef(null);
+  const [width, setWidth] = useState(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect?.width || 0;
+      // Round to nearest integer to avoid sub-pixel churn
+      const snapped = Math.round(w);
+      if (snapped !== width) setWidth(snapped);
+    });
+    ro.observe(ref.current);
+    return () => ro.disconnect();
+  }, [width]);
+
+  return [ref, width];
+}
+
+export default function ShiftsGraph({ height, preset: presetProp, onPresetChange }) {
   const { loading, error, selectors, shiftsEnhanced = [] } = useShifts();
 
-  const [mode, setMode] = useState("earnings"); 
+  const [mode, setMode] = useState("earnings");
   const [internalPreset, setInternalPreset] = useState("last7");
   const preset = presetProp ?? internalPreset;
   const setPreset = onPresetChange ?? setInternalPreset;
+
   const [openDrop, setOpenDrop] = useState(false);
   const dropRef = useRef(null);
 
@@ -44,11 +67,15 @@ export default function ShiftsGraph({ height = 380, preset: presetProp, onPreset
     };
 
     for (const s of shiftsEnhanced) {
-      const dayKey = s.dayKey || (() => {
-        const di = new Date(s.clock_in);
-        if (Number.isNaN(di.getTime())) return null;
-        return `${di.getFullYear()}-${String(di.getMonth() + 1).padStart(2, "0")}-${String(di.getDate()).padStart(2, "0")}`;
-      })();
+      const dayKey =
+        s.dayKey ||
+        (() => {
+          const di = new Date(s.clock_in);
+          if (Number.isNaN(di.getTime())) return null;
+          return `${di.getFullYear()}-${String(di.getMonth() + 1).padStart(2, "0")}-${String(
+            di.getDate()
+          ).padStart(2, "0")}`;
+        })();
 
       if (!dayKey) continue;
 
@@ -66,17 +93,15 @@ export default function ShiftsGraph({ height = 380, preset: presetProp, onPreset
     return map;
   }, [shiftsEnhanced, series?.start, series?.end]);
 
-  const statValue = mode === "hours"
-    ? `${Number(series.totals.hours || 0).toFixed(2)} hours`
-    : fmtCurrency(series.totals.earnings || 0);
-
-  const delta = mode === "hours" ? series.deltaPct.hours : series.deltaPct.earnings;
-  const deltaUp = (delta || 0) >= 0;
+  const statValue =
+    mode === "hours"
+      ? `${Number(series.totals.hours || 0).toFixed(2)} hours`
+      : fmtCurrency(series.totals.earnings || 0);
 
   const noData = useMemo(() => {
     const arr = series?.data || [];
     if (!arr.length) return true;
-    return arr.every((d) => (Number(d.earnings || 0) === 0) && (Number(d.hours || 0) === 0));
+    return arr.every((d) => Number(d.earnings || 0) === 0 && Number(d.hours || 0) === 0);
   }, [series]);
 
   const CustomTooltip = ({ active, payload }) => {
@@ -90,23 +115,15 @@ export default function ShiftsGraph({ height = 380, preset: presetProp, onPreset
         <div className="mt-2 text-sm text-text-secondary space-y-1">
           {mode !== "hours" && (
             <div>
-              Earnings:{" "}
-              <span className="text-text-primary font-medium">
-                {fmtCurrency(p.earnings)}
-              </span>
+              Earnings: <span className="text-text-primary font-medium">{fmtCurrency(p.earnings)}</span>
             </div>
           )}
           {mode !== "earnings" && (
             <div>
-              Hours:{" "}
-              <span className="text-text-primary font-medium">
-                {Number(p.hours || 0).toFixed(2)}
-              </span>
+              Hours: <span className="text-text-primary font-medium">{Number(p.hours || 0).toFixed(2)}</span>
             </div>
           )}
-          {roles.length > 0 && (
-            <div>Roles: {roles.join(", ")}</div>
-          )}
+          {roles.length > 0 && <div>Roles: {roles.join(", ")}</div>}
         </div>
       </div>
     );
@@ -117,11 +134,11 @@ export default function ShiftsGraph({ height = 380, preset: presetProp, onPreset
     preset === "last30" ? "Last 30 days" :
     preset === "last90" ? "Last 90 days" : "Last 7 days";
 
+  const [snapRef, snappedWidth] = useSnappedWidth();
+
   return (
-    <div
-      className="min-w-0 max-w-full w-full bg-white rounded-lg shadow-sm p-4 md:p-6 border border-border-light flex flex-col"
-      style={{ height }}
-    >
+    <div className="relative min-w-0 max-w-full w-full bg-white rounded-lg shadow-sm p-4 md:p-6 border border-border-light flex flex-col">
+      {/* Header */}
       <div className="flex justify-between items-start gap-4">
         <div>
           <h5 className="leading-none text-3xl font-bold text-slate-900 pb-2">
@@ -131,28 +148,9 @@ export default function ShiftsGraph({ height = 380, preset: presetProp, onPreset
             {mode === "hours" ? "Hours" : "Earnings"} in {series.label}
           </p>
         </div>
-      
-        {/*Delta up/down arrow for percentage rise (currently not intuitive, commenting out until improved
-
-
-        <div className="flex items-center gap-3">
-          <div
-            className={`flex items-center px-2.5 py-0.5 text-base font-semibold ${
-              deltaUp ? "text-green-600" : "text-red-600"
-            }`}
-            title={`${deltaUp ? "Up" : "Down"} vs previous period`}
-          >
-            {`${Math.abs(delta || 0).toFixed(0)}%`}
-            <svg className={`w-3 h-3 ms-1 ${deltaUp ? "" : "rotate-180"}`} viewBox="0 0 10 14" fill="none">
-              <path d="M5 13V1M5 1L1 5m4-4 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-        </div>
-        */}
       </div>
-      
 
-      {/* modes */}
+      {/* Mode toggles */}
       <div className="flex items-center gap-1.5 mt-4">
         {["earnings", "hours"].map((m) => (
           <button
@@ -171,68 +169,114 @@ export default function ShiftsGraph({ height = 380, preset: presetProp, onPreset
         ))}
       </div>
 
-      {/* chart area */}
-      <div className="flex-1 w-full mt-3 min-h-0">
-        {loading && (
-          <div className="h-full w-full flex items-center justify-center">
-            <div className="h-10 w-10 rounded-full border-2 border-slate-300 border-t-primary animate-spin" aria-label="Loading" />
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="h-full w-full flex items-center justify-center">
-            <div className="text-sm text-red-600">{error}</div>
-          </div>
-        )}
-
-        {!loading && !error && noData && (
-          <div className="mt-2 h-full w-full flex items-center justify-center">
-            <div className="max-w-sm w-full mx-auto p-5 text-center rounded-lg border border-border-light bg-white/95 backdrop-blur shadow-sm">
-              <div className="flex items-center justify-center mb-3">
-                <img src="/clock.svg" alt="No data" className="w-20 h-20 opacity-70" />
-              </div>
-              <h3 className="text-base font-semibold text-slate-900">No shifts in this range</h3>
-              <p className="mt-1 text-sm text-slate-600">Try a different date range, or add your latest shift.</p>
+      {/* Chart area */}
+      <div
+        ref={snapRef}
+        className={`w-full mt-3 overflow-hidden outline-none focus:outline-none ${
+          !height ? "h-[240px] sm:h-[260px] md:h-[300px]" : ""
+        }`}
+        style={height ? { height, outline: "none" } : { outline: "none" }}
+        tabIndex={-1}
+      >
+        <div
+          className="h-full"
+          style={{
+            // Lock to integer width to stop X-axis flicker
+            width: snappedWidth ? `${snappedWidth}px` : "100%",
+          }}
+        >
+          {loading && (
+            <div className="h-full w-full flex items-center justify-center">
+              <div className="h-10 w-10 rounded-full border-2 border-slate-300 border-t-primary animate-spin" aria-label="Loading" />
             </div>
-          </div>
-        )}
+          )}
 
-        {!loading && !error && !noData && (
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={series.data} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
-              <defs>
-                <linearGradient id="areaEarnings" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--color-primary-600)" stopOpacity="0.35" />
-                  <stop offset="100%" stopColor="var(--color-primary-600)" stopOpacity="0.05" />
-                </linearGradient>
-                <linearGradient id="areaHours" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--color-secondary-500)" stopOpacity="0.35" />
-                  <stop offset="100%" stopColor="var(--color-secondary-500)" stopOpacity="0.05" />
-                </linearGradient>
-              </defs>
+          {!loading && error && (
+            <div className="h-full w-full flex items-center justify-center">
+              <div className="text-sm text-red-600">{String(error)}</div>
+            </div>
+          )}
 
-              <CartesianGrid strokeDasharray="2 2" />
-              <XAxis dataKey="date" interval="preserveStartEnd" minTickGap={20} tickLine={false} axisLine={{ stroke: "rgba(0,0,0,0.14)" }} />
-              <YAxis tickLine={false} axisLine={{ stroke: "rgba(0,0,0,0.14)" }}
-                tickFormatter={(v) => (mode === "hours" ? Number(v || 0).toFixed(2) : `$${Number(v || 0).toFixed(0)}`)} />
-              <Tooltip content={<CustomTooltip />} />
+          {!loading && !error && noData && (
+            <div className="h-full w-full flex items-center justify-center px-2 sm:px-4">
+              <div className="w-full mx-auto text-center rounded-xl border border-border-light bg-white/95 backdrop-blur shadow-sm box-border p-4 sm:p-5 max-w-[min(26rem,100%)] max-h-[calc(100%-1.25rem)] overflow-auto">
+                <div className="flex items-center justify-center mb-3">
+                  <img src="/clock.svg" alt="No data" className="h-14 w-14 md:h-16 md:w-16 opacity-70" />
+                </div>
+                <h3 className="text-base font-semibold text-slate-900">No shifts in this range</h3>
+                <p className="mt-1 text-sm text-slate-600">
+                  Try a different date range, or add your latest shift.
+                </p>
+              </div>
+            </div>
+          )}
 
-              {mode === "earnings" && (
-                <Area type="monotone" dataKey="earnings" name="Earnings"
-                  stroke="var(--color-primary-600)" fill="url(#areaEarnings)"
-                  strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
-              )}
-              {mode === "hours" && (
-                <Area type="monotone" dataKey="hours" name="Hours"
-                  stroke="var(--color-secondary-500)" fill="url(#areaHours)"
-                  strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
-              )}
-            </AreaChart>
-          </ResponsiveContainer>
-        )}
+          {!loading && !error && !noData && (
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+              debounce={150}
+              className="outline-none focus:outline-none"
+            >
+              <AreaChart data={series.data} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
+                <defs>
+                  <linearGradient id="areaEarnings" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--color-primary-600)" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="var(--color-primary-600)" stopOpacity="0.05" />
+                  </linearGradient>
+                  <linearGradient id="areaHours" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--color-secondary-500)" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="var(--color-secondary-500)" stopOpacity="0.05" />
+                  </linearGradient>
+                </defs>
+
+                <CartesianGrid strokeDasharray="2 2" />
+                <XAxis
+                  dataKey="date"
+                  interval="preserveStartEnd"
+                  minTickGap={20}
+                  tickLine={false}
+                  axisLine={{ stroke: "rgba(0,0,0,0.14)" }}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={{ stroke: "rgba(0,0,0,0.14)" }}
+                  tickFormatter={(v) => (mode === "hours" ? Number(v || 0).toFixed(2) : `$${Number(v || 0).toFixed(0)}`)}
+                />
+                <Tooltip content={<CustomTooltip />} wrapperStyle={{ zIndex: 40 }} />
+
+                {mode === "earnings" ? (
+                  <Area
+                    type="monotone"
+                    dataKey="earnings"
+                    name="Earnings"
+                    stroke="var(--color-primary-600)"
+                    fill="url(#areaEarnings)"
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 3 }}
+                    isAnimationActive={false}
+                  />
+                ) : (
+                  <Area
+                    type="monotone"
+                    dataKey="hours"
+                    name="Hours"
+                    stroke="var(--color-secondary-500)"
+                    fill="url(#areaHours)"
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 3 }}
+                    isAnimationActive={false}
+                  />
+                )}
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </div>
       </div>
 
-      {/* footer with dropdown */}
+      {/* Footer */}
       <div className="mt-4 pt-3 border-t border-border-light flex items-center justify-between">
         <div className="relative" ref={dropRef}>
           <button
@@ -249,7 +293,10 @@ export default function ShiftsGraph({ height = 380, preset: presetProp, onPreset
           </button>
 
           {openDrop && (
-            <div role="menu" className="z-10 absolute left-0 mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 border border-border-light">
+            <div
+              role="menu"
+              className="z-50 absolute left-0 top-full mt-1 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 border border-border-light"
+            >
               <ul className="py-2 text-sm text-gray-700" aria-label="Select date range">
                 {[
                   { id: "last7", label: "Last 7 days" },
@@ -260,9 +307,7 @@ export default function ShiftsGraph({ height = 380, preset: presetProp, onPreset
                     <button
                       type="button"
                       onClick={() => { setPreset(id); setOpenDrop(false); }}
-                      className={`w-full text-left block px-4 py-2 hover:bg-gray-100 ${
-                        preset === id ? "font-semibold text-slate-900" : ""
-                      }`}
+                      className={`w-full text-left block px-4 py-2 hover:bg-gray-100 ${preset === id ? "font-semibold text-slate-900" : ""}`}
                       role="menuitem"
                     >
                       {label}

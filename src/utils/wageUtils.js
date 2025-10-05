@@ -1,4 +1,4 @@
-import { type } from 'os';
+﻿import { type } from 'os';
 import { supabase } from '../lib/supabaseClient';
 
 
@@ -87,6 +87,36 @@ export const createUserWage = async (userId, wage) => {
         return { success: true, wage: created };
     } catch (error) {
         console.error('Unexpected error in createUserWage:', error);
+        return { success: false, error: `Unexpected error: ${error.message}` };
+    }
+};
+
+/**
+ * Deletes a wage for a specific user
+ * @param {string} userId - The user ID
+ * @param {string} wageId - The wage record ID
+ * @returns {Object} - Returns { success: boolean, error: string }
+ */
+export const deleteUserWage = async (userId, wageId) => {
+    if (!userId || !wageId) {
+        return { success: false, error: 'User ID and wage ID are required' };
+    }
+
+    try {
+        const { error } = await supabase
+            .from('wages')
+            .delete()
+            .eq('user_id', userId)
+            .eq('id', wageId);
+
+        if (error) {
+            console.error('Error deleting wage:', error);
+            return { success: false, error: `Error deleting wage: ${error.message}` };
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('Unexpected error in deleteUserWage:', error);
         return { success: false, error: `Unexpected error: ${error.message}` };
     }
 };

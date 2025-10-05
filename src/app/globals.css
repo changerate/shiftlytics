@@ -18,9 +18,6 @@
   --shadow: 0 12px 28px rgba(16,24,40,.08);
 }
 
-
-
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -93,7 +90,6 @@
     --brand:#8daa57;
     --brand-hover:#a4c16a;
   }
- 
 }
 
 html, body { height: 100%; }
@@ -104,7 +100,6 @@ body {
     radial-gradient(900px 500px at -10% 20%, rgba(120,147,66,.06), transparent 55%),
     var(--background);
   color: var(--text);
-  /* Use themed font first for consistency across dashboard */
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   overflow: visible; 
 }
@@ -135,15 +130,14 @@ body {
 .btn-outline { background:#fff; border-color: var(--border); color: var(--text); }
 .btn-outline:hover { background: var(--color-surface-hover); }
 
-
 .input { width:100%; border:1px solid var(--border); background:#fff; color:var(--text); padding:.6rem .75rem; border-radius:10px; font-size:.9rem; }
 .input:focus { outline:none; box-shadow:0 0 0 3px rgba(120,147,66,.18); border-color: var(--brand); }
-
 
 .recharts-cartesian-grid-horizontal line,
 .recharts-cartesian-grid-vertical line { stroke: rgba(0,0,0,0.08); }
 .recharts-text { fill: rgba(0,0,0,0.62) !important; }
 
+/* Heatmap */
 .react-calendar-heatmap .color-empty rect { fill: rgba(0,0,0,0.06); }
 .react-calendar-heatmap .color-gitlab-1 rect { fill: #b2e3e4; }
 .react-calendar-heatmap .color-gitlab-2 rect { fill: #95d6d8; }
@@ -151,13 +145,12 @@ body {
 .react-calendar-heatmap .color-gitlab-4 rect { fill: #548D95; }
 
 /* Ensure heatmap month/weekday labels use theme fonts + sizing */
-/* Month + weekday labels (SVG <text>) */
 .react-calendar-heatmap text.react-calendar-heatmap-month-label,
 .react-calendar-heatmap text.react-calendar-heatmap-weekday-label,
 .react-calendar-heatmap .react-calendar-heatmap-month-label,
 .react-calendar-heatmap .react-calendar-heatmap-weekday-label {
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial !important;
-  font-size: 0.7rem !important; /* ~11.2px default */
+  font-size: 0.7rem !important;
   line-height: 1.1 !important;
   fill: var(--color-text-secondary) !important;
 }
@@ -169,15 +162,33 @@ body {
 .table td.num{ text-align:right; font-variant-numeric: tabular-nums; }
 
 @layer utilities {
-  /* Tweak react-calendar-heatmap labels for small screens */
+  /* Stabilize Recharts on scroll to avoid label blinking */
+  .recharts-wrapper,
+  .recharts-responsive-container,
+  .recharts-surface {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .recharts-wrapper:focus,
+  .recharts-surface:focus,
+  .recharts-responsive-container:focus,
+  .recharts-wrapper:focus-visible,
+  .recharts-surface:focus-visible,
+  .recharts-responsive-container:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Heatmap labels small screens */
   @media (max-width: 900px) {
-    /* Month labels are SVG <text> elements; use plain CSS + !important for reliability */
     .react-calendar-heatmap text.react-calendar-heatmap-month-label,
     .react-calendar-heatmap text.react-calendar-heatmap-weekday-label,
     .react-calendar-heatmap .react-calendar-heatmap-month-label,
     .react-calendar-heatmap .react-calendar-heatmap-weekday-label {
-      font-size: 0.55rem !important; /* ~8.8px on small screens */
-      line-height: 1.05 !important; /* tighter */
+      font-size: 0.55rem !important;
+      line-height: 1.05 !important;
       letter-spacing: .01em !important;
     }
   }
@@ -186,7 +197,24 @@ body {
     .react-calendar-heatmap text.react-calendar-heatmap-weekday-label,
     .react-calendar-heatmap .react-calendar-heatmap-month-label,
     .react-calendar-heatmap .react-calendar-heatmap-weekday-label {
-      font-size: 0.5rem !important; /* ~8px for very small screens */
+      font-size: 0.5rem !important;
     }
   }
+}
+/* Pointer cursor for interactive controls */
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+[role="button"],
+a[role="button"],
+button > *,
+[role="button"] > * {
+  cursor: pointer;
+}
+
+button:disabled,
+button[disabled],
+[aria-disabled="true"] {
+  cursor: not-allowed;
 }

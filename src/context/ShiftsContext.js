@@ -138,15 +138,13 @@ export function ShiftsProvider({ children }) {
         return { key: date, date: `${Number(m)}/${Number(d)}`, earnings, hours };
       });
 
-    const spreadsheetData = enhanced.map((s) => ({
-      date: s.dayKey || "",
+    const spreadsheetData = enhanced.map((s) => ({ id: s.id, dayKey: s.dayKey || "", date: s.dayKey || "",
       clockIn: s.clock_in || "",
       clockOut: s.clock_out || "",
       earnings: s.earned || 0,
       breakStart: s.lunch_in || "",
       breakEnd: s.lunch_out || "",
-      notes: s.notes || "",
-    }));
+      notes: s.notes || "", position_title: s.position_title || "", }))
 
     return {
       shiftsEnhanced: enhanced,
@@ -243,3 +241,4 @@ export function useShifts() {
   if (!ctx) throw new Error("useShifts must be used within a ShiftsProvider");
   return ctx;
 }
+

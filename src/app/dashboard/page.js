@@ -197,14 +197,15 @@ export default function Dashboard() {
           {!loading && (
             <>
              {/* analytics */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-5 md:px-6">
-                <div className="min-w-0 rounded-xl border" style={{borderColor:'var(--border)'}}>
-                  <ShiftsGraph preset={analyticsPreset} onPresetChange={setAnalyticsPreset} />
-                </div>
-                <div className="min-w-0">
-                  <IncomePie preset={analyticsPreset} />
-                </div>
-              </div>
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-5 md:px-6">
+           <section className="min-w-0">
+  <ShiftsGraph preset={analyticsPreset} onPresetChange={setAnalyticsPreset} />
+</section>
+
+            <section className="min-w-0">
+              <IncomePie preset={analyticsPreset} />
+            </section>
+          </div>
               {/* recent shifts */}
               <motion.section {...card} className="app-card overflow-hidden no-inner-scroll">
                 <div className="section-header">
