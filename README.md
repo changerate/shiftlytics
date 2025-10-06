@@ -17,17 +17,20 @@ _Friendly login page for users to sign back in or sign up for our service_
 
 
 ![Add Shifts](public/screenshots/add_shift.png)
-_Log new shifts as they come, recorded using seperate work titles, and add your lunch breaks in for accurate accounting_
+_Log new shifts as they come, record using seperate work titles, and add your lunch breaks in for precise accounting_
 
-![Data Charts](public/screenshots/dashboard1.png)
-![Data Charts2](public/screenshots/dashboard2.png)
-_Graph, Pie Chart, and Heatmap for data visualization_
+<p align="center">
+  <img src="public/screenshots/dashboard1.png" alt="Dashboard 1" width="45%" />
+  <img src="public/screenshots/dashboard2.png" alt="Dashboard 2" width="45%" />
+</p>
+
+_Graph, Pie Chart, and Heatmap for work and income data visualization_
 
 ![Data Export](public/screenshots/dashboard3.png)
 _Option to export your recorded data as either a PDF or CSV file for personal keep and offline accessibility_
 
 ![Audit Feature](public/screenshots/audit.png)
-_Parser tool to audit your paychecks for accuracy by coming the number of hours recorded with what you logged on our app_
+_Parser tool to audit your paychecks for accuracy by comparing the number of hours recorded with what you logged on our app_
 
 
 ## 🚀 Tech Stack
