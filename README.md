@@ -61,13 +61,6 @@ _A parser tool to audit your paychecks and confirm accuracy between recorded and
   - [Supabase](https://supabase.com/) for data storage and authentication  
 
 ---
-
-## 🛠️ Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/changerate/shiftlytics
-
 ## 🛠️ Installation
 
 1. Clone the repository:
